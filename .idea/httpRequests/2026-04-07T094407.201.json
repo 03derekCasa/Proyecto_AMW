@@ -1,0 +1,22 @@
+{
+  "message": "Usuario registrado correctamente",
+  "token": "1|gbpGF40s08HPUuIDEXhfX7uot0LBHZ19OCEueWlu8bb782a2",
+  "user": {
+    "name": "Derek",
+    "email": "derek@amw.com",
+    "updated_at": "2026-04-07T07:44:07.000000Z",
+    "created_at": "2026-04-07T07:44:07.000000Z",
+    "id": 1,
+    "profile": {
+      "id": 1,
+      "user_id": 1,
+      "artistic_name": "Derek",
+      "specialty": null,
+      "biography": null,
+      "profile_image_url": null,
+      "social_links": null,
+      "created_at": "2026-04-07T07:44:07.000000Z",
+      "updated_at": "2026-04-07T07:44:07.000000Z"
+    }
+  }
+}

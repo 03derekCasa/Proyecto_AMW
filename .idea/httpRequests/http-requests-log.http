@@ -1,0 +1,86 @@
+POST http://localhost:8000/api/logout
+Accept: application/json
+Authorization: Bearer TU_TOKEN_AQUI
+User-Agent: IntelliJ HTTP Client/PhpStorm 2025.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+content-length: 0
+
+<> 2026-04-07T094407-3.401.json
+
+###
+
+PUT http://localhost:8000/api/profile
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer TU_TOKEN_AQUI
+Content-Length: 175
+User-Agent: IntelliJ HTTP Client/PhpStorm 2025.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+
+{
+  "artistic_name": "Derek Casa",
+  "specialty": "Arte digital",
+  "biography": "Proyecto final AMW",
+  "social_links": {
+    "instagram": "https://instagram.com/derek"
+  }
+}
+
+<> 2026-04-07T094407-2.401.json
+
+###
+
+GET http://localhost:8000/api/profile
+Accept: application/json
+Authorization: Bearer TU_TOKEN_AQUI
+User-Agent: IntelliJ HTTP Client/PhpStorm 2025.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+
+<> 2026-04-07T094407-1.401.json
+
+###
+
+GET http://localhost:8000/api/me
+Accept: application/json
+Authorization: Bearer TU_TOKEN_AQUI
+User-Agent: IntelliJ HTTP Client/PhpStorm 2025.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+
+<> 2026-04-07T094407.401.json
+
+###
+
+POST http://localhost:8000/api/login
+Accept: application/json
+Content-Type: application/json
+Content-Length: 56
+User-Agent: IntelliJ HTTP Client/PhpStorm 2025.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+
+{
+  "email": "derek@amw.com",
+  "password": "12345678"
+}
+
+<> 2026-04-07T094407.200.json
+
+###
+
+POST http://localhost:8000/api/register
+Accept: application/json
+Content-Type: application/json
+Content-Length: 114
+User-Agent: IntelliJ HTTP Client/PhpStorm 2025.2.5
+Accept-Encoding: br, deflate, gzip, x-gzip
+
+{
+  "name": "Derek",
+  "email": "derek@amw.com",
+  "password": "12345678",
+  "password_confirmation": "12345678"
+}
+
+<> 2026-04-07T094407.201.json
+
+###
+

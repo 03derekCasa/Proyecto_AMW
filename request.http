@@ -1,0 +1,51 @@
+### Register
+POST http://localhost:8000/api/register
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Derek",
+  "email": "derek@amw.com",
+  "password": "12345678",
+  "password_confirmation": "12345678"
+}
+
+### Login
+POST http://localhost:8000/api/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "derek@amw.com",
+  "password": "12345678"
+}
+
+### Me
+GET http://localhost:8000/api/me
+Accept: application/json
+Authorization: Bearer TU_TOKEN_AQUI
+
+### Profile
+GET http://localhost:8000/api/profile
+Accept: application/json
+Authorization: Bearer TU_TOKEN_AQUI
+
+### Update Profile
+PUT http://localhost:8000/api/profile
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer TU_TOKEN_AQUI
+
+{
+  "artistic_name": "Derek Casa",
+  "specialty": "Arte digital",
+  "biography": "Proyecto final AMW",
+  "social_links": {
+    "instagram": "https://instagram.com/derek"
+  }
+}
+
+### Logout
+POST http://localhost:8000/api/logout
+Accept: application/json
+Authorization: Bearer TU_TOKEN_AQUI

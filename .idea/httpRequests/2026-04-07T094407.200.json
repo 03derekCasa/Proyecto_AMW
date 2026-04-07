@@ -1,0 +1,23 @@
+{
+  "message": "Inicio de sesión correcto",
+  "token": "2|nBXq5sQuxrHCGY8xiynmYQAe0BPbRnIeepTP6xY3af92f754",
+  "user": {
+    "id": 1,
+    "name": "Derek",
+    "email": "derek@amw.com",
+    "email_verified_at": null,
+    "created_at": "2026-04-07T07:44:07.000000Z",
+    "updated_at": "2026-04-07T07:44:07.000000Z",
+    "profile": {
+      "id": 1,
+      "user_id": 1,
+      "artistic_name": "Derek",
+      "specialty": null,
+      "biography": null,
+      "profile_image_url": null,
+      "social_links": null,
+      "created_at": "2026-04-07T07:44:07.000000Z",
+      "updated_at": "2026-04-07T07:44:07.000000Z"
+    }
+  }
+}
