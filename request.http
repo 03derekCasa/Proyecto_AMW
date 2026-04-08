@@ -1,3 +1,5 @@
+@token = 5|PP3p2tw1NSIE1MXM7RczBFkanWlP9EDNlhkrmeBD230811cd
+
 ### Register
 POST http://localhost:8000/api/register
 Accept: application/json
@@ -5,7 +7,7 @@ Content-Type: application/json
 
 {
   "name": "Derek",
-  "email": "derek@amw.com",
+  "email": "derekcasa03@amw.com",
   "password": "12345678",
   "password_confirmation": "12345678"
 }
@@ -16,25 +18,25 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "email": "derek@amw.com",
+  "email": "derekcasa03@amw.com",
   "password": "12345678"
 }
 
 ### Me
 GET http://localhost:8000/api/me
 Accept: application/json
-Authorization: Bearer TU_TOKEN_AQUI
+Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
 
 ### Profile
 GET http://localhost:8000/api/profile
 Accept: application/json
-Authorization: Bearer TU_TOKEN_AQUI
+Authorization: Bearer {{token}}
 
 ### Update Profile
 PUT http://localhost:8000/api/profile
 Accept: application/json
 Content-Type: application/json
-Authorization: Bearer TU_TOKEN_AQUI
+Authorization: Bearer {{token}}
 
 {
   "artistic_name": "Derek Casa",
@@ -45,7 +47,55 @@ Authorization: Bearer TU_TOKEN_AQUI
   }
 }
 
+### Crear Post
+POST http://localhost:8000/api/posts
+Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
+Content-Type: application/json
+Accept: application/json
+
+{
+  "category_id": 1,
+  "title": "Mi primera obra",
+  "description": "Una ilustración digital inspirada en Zaragoza",
+  "type": "obra",
+  "image_url": "https://miweb.com/imagen.jpg",
+  "is_published": true
+}
+
+### Mis Posts
+GET http://localhost:8000/api/my-posts
+Accept: application/json
+Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
+
+### Todos los Posts
+GET http://localhost:8000/api/posts
+Accept: application/json
+
+### Ver Post por ID
+GET http://localhost:8000/api/posts/1
+Accept: application/json
+
+### Actualizar Post
+PUT http://localhost:8000/api/posts/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "category_id": 1,
+  "title": "Mi primera obra ACTUALIZADA",
+  "description": "Descripción actualizada",
+  "type": "obra",
+  "image_url": "https://miweb.com/imagen2.jpg",
+  "is_published": true
+}
+
+### Eliminar Post
+DELETE http://localhost:8000/api/posts/1
+Accept: application/json
+Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
+
 ### Logout
 POST http://localhost:8000/api/logout
 Accept: application/json
-Authorization: Bearer TU_TOKEN_AQUI
+Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
