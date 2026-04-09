@@ -136,7 +136,7 @@ export default {
   },
   methods: {
     handleRegister() {
-      // Lógica para el registro de usuario (puedes agregar aquí la API de registro)
+      // Lógica para el registro de usuario
       console.log("Full Name:", this.fullName);
       console.log("Discipline:", this.discipline);
       console.log("Email:", this.email);
