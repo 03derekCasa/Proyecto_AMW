@@ -10,7 +10,7 @@
           <span class="italic text-primary">Finds a Way.</span>
         </h1>
         <p class="font-body text-lg text-on-surface-variant max-w-md">
-          Join a curated ecosystem of digital masters and emerging visionaries. Your gallery awaits.
+          Únete a nuestra comunidad de artistas y crea tu propia galeria virtual.
         </p>
       </div>
       <!--imagen -->
@@ -27,18 +27,18 @@
       </div>
       <div class="w-full max-w-sm">
         <header class="mb-12">
-          <h2 class="font-serif text-4xl mb-4 text-on-surface">Welcome back</h2>
-          <p class="font-body text-on-surface-variant">Please enter your credentials to access the studio.</p>
+          <h2 class="font-serif text-4xl mb-4 text-on-surface">Bienvenido</h2>
+          <p class="font-body text-on-surface-variant">Introduce tus credenciales para acceder a tu studio virtual.</p>
         </header>
         <form action="#" class="space-y-10" method="POST">
           <div class="relative group">
-            <label class="font-serif text-sm font-semibold text-on-surface-variant block mb-1" for="email">Email Address</label>
+            <label class="font-serif text-sm font-semibold text-on-surface-variant block mb-1" for="email">Email</label>
             <input class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline focus:border-b-2 focus:border-primary focus:ring-0 transition-all py-3 px-0 font-body text-on-surface placeholder:text-zinc-300" id="email" name="email" placeholder="artist@gallery.com" required="" type="email"/>
           </div>
           <div class="relative group">
             <div class="flex justify-between items-center mb-1">
-              <label class="font-serif text-sm font-semibold text-on-surface-variant block" for="password">Password</label>
-              <a class="font-label text-[10px] uppercase tracking-widest text-primary font-bold hover:opacity-70 transition-opacity" href="#">Forgot password?</a>
+              <label class="font-serif text-sm font-semibold text-on-surface-variant block" for="password">Contraseña</label>
+              <a class="font-label text-[10px] uppercase tracking-widest text-primary font-bold hover:opacity-70 transition-opacity" href="#">¿Olvidaste la contraseña?</a>
             </div>
             <input class="w-full bg-transparent border-t-0 border-x-0 border-b border-outline focus:border-b-2 focus:border-primary focus:ring-0 transition-all py-3 px-0 font-body text-on-surface placeholder:text-zinc-300" id="password" name="password" placeholder="••••••••" required="" type="password"/>
           </div>
@@ -50,14 +50,14 @@
         </form>
         <div class="mt-12 text-center">
           <p class="font-body text-sm text-on-surface-variant">
-            Don't have an account?
-            <a class="font-bold text-on-surface hover:text-primary transition-colors underline decoration-primary/30 underline-offset-4 ml-1" href="http://localhost:8080/register">Sign up</a>
+            ¿No tienes cuenta?
+            <a class="font-bold text-on-surface hover:text-primary transition-colors underline decoration-primary/30 underline-offset-4 ml-1" href="http://localhost:8080/register">Registrate</a>
           </p>
         </div>
       </div>
 
       <div class="w-full max-w-sm mt-16 pt-8 border-t border-outline-variant/20">
-        <p class="text-center font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-6">Or continue with</p>
+        <p class="text-center font-label text-[10px] uppercase tracking-widest text-on-surface-variant mb-6">O continua con</p>
         <div class="grid grid-cols-2 gap-4">
           <button class="flex items-center justify-center py-4 border border-outline hover:bg-surface-container-low transition-colors">
             <span class="font-label text-[10px] uppercase tracking-widest font-bold">Google</span>

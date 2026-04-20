@@ -75,15 +75,15 @@
                 class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-label text-sm font-extrabold py-5 uppercase tracking-[0.2em] hover:opacity-90 active:scale-[0.98] transition-all duration-200"
                 type="submit"
             >
-              Create Account
+              Crear una cuenta
             </button>
           </div>
         </form>
         <!-- Footer Link -->
         <footer class="pt-8 border-t border-surface-container-low flex flex-col sm:flex-row items-center gap-4">
-          <p class="text-on-surface-variant font-body text-sm">Already have an account?</p>
+          <p class="text-on-surface-variant font-body text-sm">¿Ya tienes una cuenta?</p>
           <a class="font-label text-primary font-bold text-xs uppercase tracking-widest border-b-2 border-primary-container pb-1 hover:border-primary transition-colors" href="http://localhost:8080/">
-            Log in
+            Iniciar sesión
           </a>
         </footer>
       </div>
