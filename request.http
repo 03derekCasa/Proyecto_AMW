@@ -1,4 +1,4 @@
-@token = 5|PP3p2tw1NSIE1MXM7RczBFkanWlP9EDNlhkrmeBD230811cd
+@token =
 
 ### Register
 POST http://localhost:8000/api/register
@@ -25,7 +25,7 @@ Content-Type: application/json
 ### Me
 GET http://localhost:8000/api/me
 Accept: application/json
-Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
+Authorization: Bearer {{token}}
 
 ### Profile
 GET http://localhost:8000/api/profile
@@ -49,7 +49,7 @@ Authorization: Bearer {{token}}
 
 ### Crear Post
 POST http://localhost:8000/api/posts
-Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
+Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept: application/json
 
@@ -65,7 +65,7 @@ Accept: application/json
 ### Mis Posts
 GET http://localhost:8000/api/my-posts
 Accept: application/json
-Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
+Authorization: Bearer {{token}}
 
 ### Todos los Posts
 GET http://localhost:8000/api/posts
@@ -93,9 +93,9 @@ Accept: application/json
 ### Eliminar Post
 DELETE http://localhost:8000/api/posts/1
 Accept: application/json
-Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
+Authorization: Bearer {{token}}
 
 ### Logout
 POST http://localhost:8000/api/logout
 Accept: application/json
-Authorization: Bearer 13|Xh1L3M5hEiu4QMB20skNFWsl63Q0WZJxGH7gUjdD5c98a864
+Authorization: Bearer {{token}}

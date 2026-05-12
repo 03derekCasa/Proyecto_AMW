@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Like;
 use App\Models\Post;
+use App\Models\Comment;
 
 class User extends Authenticatable
 {
@@ -41,5 +43,20 @@ class User extends Authenticatable
     public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function likedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'likes')->withTimestamps();
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }
