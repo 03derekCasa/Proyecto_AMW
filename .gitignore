@@ -1,8 +1,10 @@
 .env
 .env.*
-node_modules/
 vendor/
-storage/*.key
+node_modules/
+**/node_modules/
+dist/
+**/dist/
 .idea/
 .DS_Store
-dist/
+storage/*.key
