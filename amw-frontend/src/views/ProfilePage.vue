@@ -486,17 +486,8 @@ export default {
 
     async loadMyPosts() {
       try {
-        const response = await getMyPosts()
-
-        let posts = []
-
-        if (Array.isArray(response.data?.data)) {
-          posts = response.data.data
-        } else if (Array.isArray(response.data)) {
-          posts = response.data
-        } else if (Array.isArray(response.data?.data?.data)) {
-          posts = response.data.data.data
-        }
+        const result = await getMyPosts()
+        const posts = result.posts
 
         this.artworks = posts.map((post) => ({
           id: post.id,

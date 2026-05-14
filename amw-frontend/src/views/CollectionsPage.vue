@@ -310,8 +310,10 @@
 </template>
 
 <script>
-import api from '@/services/api'
-
+import {
+  getMyLikes,
+  unlikePost,
+} from '@/services/postService'
 export default {
   name: 'CollectionsPage',
 
@@ -354,84 +356,18 @@ export default {
   },
 
   async mounted() {
-    await this.loadSidebarProfile()
     await this.loadLikedPosts()
   },
 
   methods: {
-
-    async loadSidebarProfile() {
-      try {
-        const storedUser = localStorage.getItem('amw_user')
-        let localUser = null
-
-        if (storedUser) {
-          localUser = JSON.parse(storedUser)
-        }
-
-        const response = await api.get('/profile')
-        const payload = response.data
-        const profileData = payload.data || payload.profile || payload
-
-        this.profile = profileData || {}
-
-        this.userName =
-            profileData?.artistic_name ||
-            localUser?.profile?.artistic_name ||
-            localUser?.name ||
-            'Artista AMW'
-
-        this.userProfileImage =
-            profileData?.profile_image_url ||
-            localUser?.profile?.profile_image_url ||
-            localUser?.avatar ||
-            this.userProfileImage
-      } catch (error) {
-        const storedUser = localStorage.getItem('amw_user')
-
-        if (storedUser) {
-          const localUser = JSON.parse(storedUser)
-
-          this.userName =
-              localUser?.profile?.artistic_name ||
-              localUser?.name ||
-              'Artista AMW'
-
-          this.userProfileImage =
-              localUser?.profile?.profile_image_url ||
-              localUser?.avatar ||
-              this.userProfileImage
-        }
-
-        if (error.response?.status === 401) {
-          localStorage.removeItem('amw_token')
-          localStorage.removeItem('amw_user')
-          this.$router.push('/login')
-        }
-      }
-    },
 
     async loadLikedPosts() {
       this.loading = true
       this.errorMessage = ''
 
       try {
-        const response = await api.get('/my-likes')
-        const payload = response.data
-
-        let items = []
-
-        if (Array.isArray(payload.data)) {
-          items = payload.data
-        } else if (Array.isArray(payload.data?.data)) {
-          items = payload.data.data
-        } else if (Array.isArray(payload)) {
-          items = payload
-        }
-
-        this.likedPosts = items
-            .map((item) => item.post || item)
-            .filter((post) => post && post.id)
+        const result = await getMyLikes()
+        this.likedPosts = result.posts
       } catch (error) {
         this.errorMessage = 'No se pudieron cargar tus likes.'
       } finally {
@@ -441,7 +377,7 @@ export default {
 
     async removeLike(post) {
       try {
-        await api.delete(`/posts/${post.id}/like`)
+        await unlikePost(post.id)
 
         this.likedPosts = this.likedPosts.filter((item) => item.id !== post.id)
       } catch (error) {

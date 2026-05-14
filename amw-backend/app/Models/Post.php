@@ -18,6 +18,7 @@ class Post extends Model
         'category_id',
         'title',
         'description',
+        'hashtags',
         'image_url',
         'type',
         'is_published',
@@ -25,6 +26,7 @@ class Post extends Model
 
     protected $casts = [
         'is_published' => 'boolean',
+        'hashtags' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

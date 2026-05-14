@@ -85,7 +85,7 @@
             class="sidebar-upload-button"
             :class="isExpanded ? 'sidebar-upload-expanded' : 'sidebar-upload-collapsed'"
             type="button"
-            @click="$router.push('/feed')"
+            @click="showCreatePostModal = true"
             :title="!isExpanded ? 'Subir obra' : null"
         >
           <span
@@ -125,19 +125,29 @@
       </div>
     </div>
   </aside>
+  <CreatePostModal
+      v-model="showCreatePostModal"
+      @created="handlePostCreated"
+  />
 </template>
 
 <script>
 import api from '@/services/api'
+import CreatePostModal from '@/components/CreatePostModal.vue'
 
 export default {
   name: 'AppSidebar',
+
+  components: {
+    CreatePostModal,
+  },
 
   data() {
     return {
       isExpanded: false,
       userName: 'Artista AMW',
       userProfileImage: 'https://placehold.co/400x500?text=AMW',
+      showCreatePostModal: false,
     }
   },
 
@@ -146,6 +156,10 @@ export default {
   },
 
   methods: {
+
+    handlePostCreated(post) {
+      window.dispatchEvent(new CustomEvent('amw-post-created', { detail: post }))
+    },
 
     handleFocusOut(event) {
       if (!event.currentTarget.contains(event.relatedTarget)) {

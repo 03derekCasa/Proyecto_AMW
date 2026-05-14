@@ -13,6 +13,7 @@ class PostResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
+            'hashtags' => $this->hashtags ?? [],
             'image_url' => $this->image_url,
             'type' => $this->type,
             'is_published' => $this->is_published,
@@ -20,10 +21,14 @@ class PostResource extends JsonResource
             'comments_count' => $this->comments_count ?? 0,
 
             'category' => $this->whenLoaded('category', function () {
+                if (!$this->category) {
+                    return null;
+                }
+
                 return [
-                    'id' => $this->category?->id,
-                    'name' => $this->category?->name,
-                    'slug' => $this->category?->slug,
+                    'id' => $this->category->id,
+                    'name' => $this->category->name,
+                    'slug' => $this->category->slug,
                 ];
             }),
 

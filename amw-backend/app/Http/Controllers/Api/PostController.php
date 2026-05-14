@@ -41,9 +41,11 @@ class PostController extends Controller
             'category_id' => ['nullable', 'exists:categories,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'image_url' => ['nullable', 'string', 'max:255'],
-            'type' => ['required', 'in:obra,evento,producto'],
-            'is_published' => ['nullable', 'boolean'],
+            'image_url' => ['nullable', 'string', 'max:2048'],
+            'type' => ['required', 'string', 'in:obra,evento,producto'],
+            'is_published' => ['boolean'],
+            'hashtags' => ['nullable', 'array', 'max:10'],
+            'hashtags.*' => ['string', 'max:40'],
         ]);
 
         $post = Post::create([
@@ -54,6 +56,7 @@ class PostController extends Controller
             'image_url' => $validated['image_url'] ?? null,
             'type' => $validated['type'],
             'is_published' => $validated['is_published'] ?? true,
+            'hashtags' => $validated['hashtags'] ?? [],
         ]);
 
         $post->load(['user.profile', 'category']);
@@ -61,7 +64,7 @@ class PostController extends Controller
 
         return response()->json([
             'message' => 'Publicación creada correctamente',
-            'data' => new PostResource($post->load),
+            'data' => new PostResource($post),
         ], 201);
     }
 
@@ -106,14 +109,17 @@ class PostController extends Controller
             'category_id' => ['nullable', 'exists:categories,id'],
             'title' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'image_url' => ['nullable', 'string', 'max:255'],
+            'hashtags' => ['nullable', 'array', 'max:10'],
+            'hashtags.*' => ['string', 'max:40'],
+            'image_url' => ['nullable', 'string', 'max:2048'],
             'type' => ['sometimes', 'required', 'in:obra,evento,producto'],
             'is_published' => ['nullable', 'boolean'],
         ]);
 
         $post->update($validated);
+
         $post->load(['user.profile', 'category']);
-        $post->loadCount('likes');
+        $post->loadCount(['likes', 'comments']);
 
         return response()->json([
             'message' => 'Publicación actualizada correctamente',

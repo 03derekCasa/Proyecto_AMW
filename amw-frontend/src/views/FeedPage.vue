@@ -238,8 +238,11 @@
 </template>
 
 <script>
-  import api from '@/services/api'
-
+  import {
+    getPosts,
+    likePost,
+    unlikePost,
+  } from '@/services/postService'
   export default {
     name: 'FeedPage',
 
@@ -272,31 +275,28 @@
     },
 
     async mounted() {
+      window.addEventListener('amw-post-created', this.handlePostCreated)
       await this.loadPosts()
     },
 
+    beforeUnmount() {
+      window.removeEventListener('amw-post-created', this.handlePostCreated)
+    },
+
     methods: {
+
+      handlePostCreated() {
+        this.loadPosts()
+      },
+
       async loadPosts(url = '/posts') {
         this.loading = true
         this.errorMessage = ''
 
         try {
-          const response = await api.get(url)
-          const payload = response.data
+          const result = await getPosts(url)
 
-          let posts = []
-          let nextPageUrl = null
-
-          if (Array.isArray(payload.data)) {
-            posts = payload.data
-          } else if (Array.isArray(payload.data?.data)) {
-            posts = payload.data.data
-            nextPageUrl = payload.data.next_page_url
-          } else if (Array.isArray(payload)) {
-            posts = payload
-          }
-
-          const normalizedPosts = posts.map((post) => ({
+          const normalizedPosts = result.posts.map((post) => ({
             ...post,
             liked_by_me: post.liked_by_me || false,
             likes_count: post.likes_count || 0,
@@ -308,7 +308,7 @@
             this.posts = [...this.posts, ...normalizedPosts]
           }
 
-          this.nextPageUrl = nextPageUrl
+          this.nextPageUrl = result.nextPageUrl
         } catch (error) {
           this.errorMessage = 'No se pudieron cargar las publicaciones.'
         } finally {
@@ -321,8 +321,7 @@
           return
         }
 
-        const url = this.nextPageUrl.replace('http://localhost:8000/api', '')
-        await this.loadPosts(url)
+        await this.loadPosts(this.nextPageUrl)
       },
 
       async handleLike(post) {
@@ -335,11 +334,11 @@
 
         try {
           if (post.liked_by_me) {
-            await api.delete(`/posts/${post.id}/like`)
+            await unlikePost(post.id)
             post.liked_by_me = false
             post.likes_count = Math.max((post.likes_count || 1) - 1, 0)
           } else {
-            await api.post(`/posts/${post.id}/like`)
+            await likePost(post.id)
             post.liked_by_me = true
             post.likes_count = (post.likes_count || 0) + 1
           }
