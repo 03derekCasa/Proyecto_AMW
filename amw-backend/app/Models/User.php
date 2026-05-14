@@ -11,6 +11,8 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Models\Like;
 use App\Models\Post;
 use App\Models\Comment;
+use App\Models\Conversation;
+use App\Models\Message;
 
 class User extends Authenticatable
 {
@@ -58,5 +60,17 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class)
+            ->withPivot('last_read_at')
+            ->withTimestamps();
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
     }
 }
