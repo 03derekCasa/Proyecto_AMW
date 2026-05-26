@@ -18,6 +18,9 @@ class PostResource extends JsonResource
             'type' => $this->type,
             'is_published' => $this->is_published,
             'likes_count' => $this->likes_count ?? 0,
+            'liked_by_me' => $request->user()
+                ? $this->likes()->where('user_id', $request->user()->id)->exists()
+                : false,
             'comments_count' => $this->comments_count ?? 0,
 
             'category' => $this->whenLoaded('category', function () {

@@ -10,7 +10,7 @@
 
     <main class="ml-20 pt-32 min-h-screen" aria-labelledby="public-profile-title">
       <div v-if="loading" class="px-24 py-20 font-manrope text-sm text-stone-500">
-        Cargando perfil público...
+        {{ ui.loading }}
       </div>
 
       <div
@@ -41,14 +41,14 @@
                 <img
                     class="w-full h-full object-cover"
                     :src="userProfileImage"
-                    :alt="`Imagen de perfil de ${userName}`"
+                    :alt="ui.profileImageOf(userName)"
                 />
               </div>
             </div>
 
             <div class="mb-8">
               <p class="font-manrope text-[10px] uppercase tracking-[0.3em] text-primary mb-3">
-                Perfil público
+                {{ ui.publicProfile }}
               </p>
 
               <h1
@@ -59,13 +59,13 @@
               </h1>
 
               <p class="font-manrope text-sm text-stone-500 uppercase tracking-widest">
-                {{ profile.specialty || 'Artista AMW' }}
+                {{ profile.specialty || ui.artist }}
               </p>
 
-              <div class="flex gap-8 mt-6" aria-label="Estadísticas del perfil público">
+              <div class="flex gap-8 mt-6" :aria-label="ui.statisticsLabel">
                 <div class="flex flex-col">
                   <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
-                    Obras
+                    {{ ui.works }}
                   </span>
                   <span class="font-notoSerif text-2xl">
                     {{ userWorksCount }}
@@ -74,7 +74,7 @@
 
                 <div class="flex flex-col">
                   <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
-                    Seguidores
+                    {{ ui.followers }}
                   </span>
                   <span class="font-notoSerif text-2xl">
                     {{ userFollowers }}
@@ -83,7 +83,7 @@
 
                 <div class="flex flex-col">
                   <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
-                    Siguiendo
+                    {{ ui.following }}
                   </span>
                   <span class="font-notoSerif text-2xl">
                     {{ userFollowing }}
@@ -120,11 +120,11 @@
           <!-- Columna izquierda -->
           <aside class="col-span-4 sticky top-48 self-start">
             <p class="font-manrope text-[10px] uppercase tracking-[0.3em] text-primary mb-6">
-              Descripción
+              {{ ui.description }}
             </p>
 
             <div class="font-notoSerif text-lg leading-relaxed text-on-surface-variant italic border-l-2 border-primary/20 pl-8">
-              "{{ profile.biography || 'Este artista todavía no ha añadido una biografía pública.' }}"
+              "{{ profile.biography || ui.emptyBiography }}"
             </div>
 
             <div class="mt-12 space-y-8">
@@ -134,7 +134,7 @@
                   :disabled="startingConversation"
                   @click="startConversation"
               >
-                {{ startingConversation ? 'Abriendo chat...' : 'Enviar mensaje' }}
+                {{ startingConversation ? ui.openingChat : ui.sendMessage }}
               </button>
 
               <div class="flex gap-4">
@@ -144,7 +144,7 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
-                    aria-label="Abrir página web del artista"
+                    :aria-label="ui.openWebsite"
                 >
                   language
                 </a>
@@ -155,7 +155,7 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
-                    aria-label="Abrir Instagram del artista"
+                    :aria-label="ui.openInstagram"
                 >
                   share
                 </a>
@@ -166,7 +166,7 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
-                    aria-label="Abrir Behance del artista"
+                    :aria-label="ui.openBehance"
                 >
                   open_in_new
                 </a>
@@ -177,16 +177,16 @@
           <!-- Obras -->
           <div class="col-span-8">
             <h2 class="font-manrope text-[10px] uppercase tracking-[0.3em] text-stone-400 mb-12">
-              Obras seleccionadas
+              {{ ui.selectedWorks }}
             </h2>
 
             <div v-if="artworks.length === 0" class="bg-surface-container-low p-12 border border-outline-variant/20">
               <p class="font-notoSerif text-2xl italic mb-4">
-                Este perfil todavía no tiene publicaciones.
+                {{ ui.emptyWorksTitle }}
               </p>
 
               <p class="font-manrope text-sm text-stone-500">
-                Cuando este usuario publique obras en AMW, aparecerán aquí.
+                {{ ui.emptyWorksText }}
               </p>
             </div>
 
@@ -199,12 +199,12 @@
                   <img
                       class="w-full h-full object-cover transition-all duration-700"
                       :src="artwork.image"
-                      :alt="`Obra ${artwork.title}`"
+                      :alt="ui.artworkImage(artwork.title)"
                   />
 
                   <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white px-4 py-2">
-                      Ver obra
+                      {{ ui.viewArtwork }}
                     </span>
                   </div>
                 </div>
@@ -226,7 +226,7 @@
                   to="/feed"
                   class="px-16 py-4 border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
               >
-                Volver al feed
+                {{ ui.backToFeed }}
               </router-link>
             </div>
           </div>
@@ -240,7 +240,7 @@
               </h2>
 
               <p class="font-manrope text-sm text-stone-500 leading-relaxed">
-                Perfil público de artista dentro de Art Makes A Way.
+                {{ ui.footerDescription }}
               </p>
             </div>
           </div>
@@ -253,6 +253,97 @@
 <script>
 import api from '@/services/api'
 import AppSidebar from '@/components/AppSidebar.vue'
+import { logoutUser } from '@/services/authService'
+
+const publicProfileTexts = {
+  es: {
+    loading: 'Cargando perfil público...',
+    publicProfile: 'Perfil público',
+    artist: 'Artista AMW',
+    statisticsLabel: 'Estadísticas del perfil público',
+    works: 'Obras',
+    followers: 'Seguidores',
+    following: 'Siguiendo',
+    description: 'Descripción',
+    emptyBiography: 'Este artista todavía no ha añadido una biografía pública.',
+    openingChat: 'Abriendo chat...',
+    sendMessage: 'Enviar mensaje',
+    openWebsite: 'Abrir página web del artista',
+    openInstagram: 'Abrir Instagram del artista',
+    openBehance: 'Abrir Behance del artista',
+    selectedWorks: 'Obras seleccionadas',
+    emptyWorksTitle: 'Este perfil todavía no tiene publicaciones.',
+    emptyWorksText: 'Cuando este usuario publique obras en AMW, aparecerán aquí.',
+    viewArtwork: 'Ver obra',
+    backToFeed: 'Volver al feed',
+    footerDescription: 'Perfil público de artista dentro de Art Makes A Way.',
+    notFound: 'No se encontró el perfil solicitado.',
+    loadError: 'No se pudo cargar el perfil público.',
+    conversationReady: 'Conversación preparada correctamente.',
+    conversationError: 'No se pudo iniciar la conversación.',
+    artwork: 'Obra',
+    profileImageOf: (name) => `Imagen de perfil de ${name}`,
+    artworkImage: (title) => `Obra ${title}`,
+  },
+  en: {
+    loading: 'Loading public profile...',
+    publicProfile: 'Public profile',
+    artist: 'AMW Artist',
+    statisticsLabel: 'Public profile statistics',
+    works: 'Artworks',
+    followers: 'Followers',
+    following: 'Following',
+    description: 'Description',
+    emptyBiography: 'This artist has not added a public biography yet.',
+    openingChat: 'Opening chat...',
+    sendMessage: 'Send message',
+    openWebsite: "Open the artist's website",
+    openInstagram: "Open the artist's Instagram",
+    openBehance: "Open the artist's Behance",
+    selectedWorks: 'Selected artworks',
+    emptyWorksTitle: 'This profile has no publications yet.',
+    emptyWorksText: 'When this user publishes artworks on AMW, they will appear here.',
+    viewArtwork: 'View artwork',
+    backToFeed: 'Back to feed',
+    footerDescription: 'Public artist profile within Art Makes A Way.',
+    notFound: 'The requested profile was not found.',
+    loadError: 'The public profile could not be loaded.',
+    conversationReady: 'Conversation ready.',
+    conversationError: 'The conversation could not be started.',
+    artwork: 'Artwork',
+    profileImageOf: (name) => `Profile image of ${name}`,
+    artworkImage: (title) => `Artwork ${title}`,
+  },
+  fr: {
+    loading: 'Chargement du profil public...',
+    publicProfile: 'Profil public',
+    artist: 'Artiste AMW',
+    statisticsLabel: 'Statistiques du profil public',
+    works: 'Œuvres',
+    followers: 'Abonnés',
+    following: 'Abonnements',
+    description: 'Description',
+    emptyBiography: "Cet artiste n'a pas encore ajouté de biographie publique.",
+    openingChat: 'Ouverture du chat...',
+    sendMessage: 'Envoyer un message',
+    openWebsite: "Ouvrir le site de l'artiste",
+    openInstagram: "Ouvrir l'Instagram de l'artiste",
+    openBehance: "Ouvrir le Behance de l'artiste",
+    selectedWorks: 'Œuvres sélectionnées',
+    emptyWorksTitle: "Ce profil n'a pas encore de publications.",
+    emptyWorksText: "Lorsque cet utilisateur publiera des œuvres sur AMW, elles apparaîtront ici.",
+    viewArtwork: "Voir l'œuvre",
+    backToFeed: 'Retour au fil',
+    footerDescription: "Profil public d'artiste au sein d'Art Makes A Way.",
+    notFound: 'Le profil demandé est introuvable.',
+    loadError: "Le profil public n'a pas pu être chargé.",
+    conversationReady: 'Conversation prête.',
+    conversationError: "La conversation n'a pas pu être démarrée.",
+    artwork: 'Œuvre',
+    profileImageOf: (name) => `Image de profil de ${name}`,
+    artworkImage: (title) => `Œuvre ${title}`,
+  },
+}
 
 export default {
   name: 'PublicProfilePage',
@@ -291,6 +382,12 @@ export default {
     }
   },
 
+  computed: {
+    ui() {
+      return publicProfileTexts[this.$i18n.locale] || publicProfileTexts.es
+    },
+  },
+
   async mounted() {
     await this.loadPublicProfile()
   },
@@ -305,9 +402,14 @@ export default {
 
   methods: {
 
-    handleLogout() {
-      localStorage.removeItem('amw_token')
-      localStorage.removeItem('amw_user')
+    async handleLogout() {
+      try {
+        await logoutUser()
+      } catch (error) {
+        localStorage.removeItem('amw_token')
+        localStorage.removeItem('amw_user')
+      }
+
       this.$router.push('/login')
     },
 
@@ -332,7 +434,7 @@ export default {
         this.userName =
             this.profile.artistic_name ||
             this.user?.name ||
-            'Artista AMW'
+            this.ui.artist
 
         this.userProfileImage =
             this.profile.profile_image_url ||
@@ -350,17 +452,17 @@ export default {
           year: post.created_at
               ? new Date(post.created_at).getFullYear()
               : new Date().getFullYear(),
-          medium: post.category?.name || post.type || 'Obra',
+          medium: post.category?.name || post.type || this.ui.artwork,
         }))
       } catch (error) {
         if (error.response?.status === 404) {
-          this.errorMessage = 'No se encontró el perfil solicitado.'
+          this.errorMessage = this.ui.notFound
         } else if (error.response?.status === 401) {
           localStorage.removeItem('amw_token')
           localStorage.removeItem('amw_user')
           this.$router.push('/login')
         } else {
-          this.errorMessage = 'No se pudo cargar el perfil público.'
+          this.errorMessage = this.ui.loadError
         }
       } finally {
         this.loading = false
@@ -383,7 +485,7 @@ export default {
 
         const conversation = response.data.data || response.data
 
-        this.successMessage = 'Conversación preparada correctamente.'
+        this.successMessage = this.ui.conversationReady
 
         this.$router.push({
           path: '/messages',
@@ -395,7 +497,7 @@ export default {
         if (error.response?.data?.message) {
           this.actionErrorMessage = error.response.data.message
         } else {
-          this.actionErrorMessage = 'No se pudo iniciar la conversación.'
+          this.actionErrorMessage = this.ui.conversationError
         }
       } finally {
         this.startingConversation = false

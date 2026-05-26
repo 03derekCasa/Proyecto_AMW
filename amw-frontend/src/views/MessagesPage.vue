@@ -8,13 +8,13 @@
       <section class="w-[26rem] xl:w-[28rem] flex flex-col border-r border-outline-variant/15 bg-surface-container-low">        <div class="p-8 flex flex-col h-full">
           <div class="flex items-center justify-between mb-6">
             <h1 class="text-3xl social-title">
-              Mensajes
+              {{ ui.title }}
             </h1>
 
             <button
                 type="button"
                 class="bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity active:scale-95"
-                aria-label="Crear nuevo mensaje"
+                :aria-label="ui.newMessage"
                 @click="toggleNewMessagePanel"
             >
               <span class="material-symbols-outlined" aria-hidden="true">
@@ -30,13 +30,13 @@
           >
             <div class="flex items-center justify-between mb-4">
               <h2 class="font-manrope text-xs uppercase tracking-widest font-bold text-stone-600">
-                Nuevo mensaje
+                {{ ui.newMessage }}
               </h2>
 
               <button
                   type="button"
                   class="text-stone-400 hover:text-primary"
-                  aria-label="Cerrar nuevo mensaje"
+                  :aria-label="ui.closeNewMessage"
                   @click="toggleNewMessagePanel"
               >
                 <span class="material-symbols-outlined text-sm" aria-hidden="true">close</span>
@@ -45,7 +45,7 @@
 
             <div class="mb-4">
               <label for="user-search" class="sr-only">
-                Buscar usuario
+                {{ ui.searchUser }}
               </label>
 
               <input
@@ -53,13 +53,13 @@
                   v-model="userSearch"
                   type="text"
                   class="w-full border border-stone-200 px-3 py-2 text-sm font-manrope focus:ring-0 focus:border-primary"
-                  placeholder="Buscar artista..."
+                  :placeholder="ui.searchArtistPlaceholder"
                   @input="searchUsers"
               />
             </div>
 
             <div v-if="loadingUsers" class="text-xs text-stone-500 font-manrope">
-              Buscando usuarios...
+              {{ ui.searchingUsers }}
             </div>
 
             <div v-else-if="usersError" class="text-xs text-red-700 bg-red-50 border border-red-200 p-2">
@@ -67,7 +67,7 @@
             </div>
 
             <div v-else-if="users.length === 0" class="text-xs text-stone-500 font-manrope">
-              No hay usuarios para mostrar.
+              {{ ui.noUsers }}
             </div>
 
             <div v-else class="space-y-2 max-h-72 overflow-y-auto">
@@ -82,7 +82,7 @@
                   <img
                       v-if="getUserAvatar(user)"
                       :src="getUserAvatar(user)"
-                      :alt="`Avatar de ${getUserName(user)}`"
+                      :alt="ui.avatarOf(getUserName(user))"
                       class="w-full h-full object-cover"
                   />
 
@@ -107,7 +107,7 @@
           <!-- Lista de conversaciones -->
           <div class="flex-1 overflow-y-auto">
             <div v-if="loadingConversations" class="text-sm text-stone-500 font-manrope">
-              Cargando conversaciones...
+              {{ ui.loadingConversations }}
             </div>
 
             <div v-else-if="conversationError" class="text-sm text-red-700 bg-red-50 border border-red-200 p-3">
@@ -115,7 +115,7 @@
             </div>
 
             <div v-else-if="filteredConversations.length === 0" class="text-sm text-stone-500 font-manrope">
-              Todavía no tienes conversaciones.
+              {{ ui.noConversations }}
             </div>
 
             <div v-else class="space-y-1">
@@ -133,7 +133,7 @@
                   <img
                       v-if="getParticipantAvatar(conversation)"
                       :src="getParticipantAvatar(conversation)"
-                      :alt="`Avatar de ${getParticipantName(conversation)}`"
+                      :alt="ui.avatarOf(getParticipantName(conversation))"
                       class="w-full h-full object-cover"
                   />
 
@@ -154,7 +154,7 @@
                   </div>
 
                   <p class="text-sm text-stone-600 truncate font-manrope">
-                    {{ conversation.last_message?.body || 'Sin mensajes todavía.' }}
+                    {{ conversation.last_message?.body || ui.noMessagesYet }}
                   </p>
 
                   <div v-if="conversation.unread_count > 0" class="mt-2 flex gap-1">
@@ -172,11 +172,11 @@
         <div v-if="!activeConversation" class="flex-1 flex items-center justify-center text-center px-8">
           <div>
             <h2 class="font-notoSerif text-4xl italic mb-4">
-              Selecciona una conversación
+              {{ ui.selectConversation }}
             </h2>
 
             <p class="font-manrope text-stone-500">
-              Pulsa el botón + para iniciar una conversación con otro artista.
+              {{ ui.selectConversationHelp }}
             </p>
           </div>
         </div>
@@ -188,13 +188,13 @@
               <router-link
                   :to="getParticipantProfileLink(activeConversation)"
                   class="flex items-center gap-4 group"
-                  aria-label="Ver perfil del usuario"
+                  :aria-label="ui.viewUserProfile"
               >
                 <div class="w-11 h-11 rounded-full bg-stone-100 overflow-hidden">
                   <img
                       v-if="getParticipantAvatar(activeConversation)"
                       :src="getParticipantAvatar(activeConversation)"
-                      :alt="`Avatar de ${getParticipantName(activeConversation)}`"
+                      :alt="ui.avatarOf(getParticipantName(activeConversation))"
                       class="w-full h-full object-cover"
                   />
 
@@ -207,10 +207,6 @@
                   <h2 class="text-base font-bold font-manrope group-hover:text-primary transition-colors">
                     {{ getParticipantName(activeConversation) }}
                   </h2>
-
-                  <p class="font-manrope text-[10px] uppercase tracking-[0.2em] text-primary">
-                    Ver perfil AMW
-                  </p>
                 </div>
               </router-link>
 
@@ -218,15 +214,7 @@
                 <button
                     class="p-2 text-stone-400 hover:text-stone-900 transition-colors"
                     type="button"
-                    aria-label="Videollamada"
-                >
-                  <span class="material-symbols-outlined" aria-hidden="true">videocam</span>
-                </button>
-
-                <button
-                    class="p-2 text-stone-400 hover:text-stone-900 transition-colors"
-                    type="button"
-                    aria-label="Más opciones"
+                    :aria-label="ui.moreOptions"
                 >
                   <span class="material-symbols-outlined" aria-hidden="true">more_vert</span>
                 </button>
@@ -238,7 +226,7 @@
           <div ref="messagesContainer" class="flex-1 overflow-y-auto px-8 py-8">
             <div class="max-w-3xl mx-auto space-y-8">
               <div v-if="loadingMessages" class="text-sm text-stone-500 font-manrope">
-                Cargando mensajes...
+                {{ ui.loadingMessages }}
               </div>
 
               <div v-else-if="messageError" class="text-sm text-red-700 bg-red-50 border border-red-200 p-3">
@@ -246,7 +234,7 @@
               </div>
 
               <div v-else-if="messages.length === 0" class="text-sm text-stone-500 font-manrope">
-                Todavía no hay mensajes en esta conversación.
+                {{ ui.emptyConversation }}
               </div>
 
               <div v-else>
@@ -254,7 +242,7 @@
                   <div class="h-px flex-1 bg-stone-200"></div>
 
                   <span class="font-manrope text-[10px] uppercase tracking-widest text-stone-400">
-                    Conversación
+                    {{ ui.conversation }}
                   </span>
 
                   <div class="h-px flex-1 bg-stone-200"></div>
@@ -273,12 +261,12 @@
                       v-if="!isMine(message)"
                       :to="getParticipantProfileLink(activeConversation)"
                       class="w-9 h-9 rounded-full overflow-hidden bg-stone-200 shrink-0 mr-3 mt-1 hover:ring-2 hover:ring-primary transition-all"
-                      aria-label="Ver perfil del usuario"
+                      :aria-label="ui.viewUserProfile"
                   >
                     <img
                         v-if="getMessageSenderAvatar(message)"
                         :src="getMessageSenderAvatar(message)"
-                        :alt="`Foto de perfil de ${getMessageSenderName(message)}`"
+                        :alt="ui.profilePhotoOf(getMessageSenderName(message))"
                         class="w-full h-full object-cover"
                     />
 
@@ -311,7 +299,7 @@
                       <div v-if="message.image_url" class="w-full max-w-md h-64 bg-stone-200 mt-4 overflow-hidden rounded-xl">
                         <img
                             :src="message.image_url"
-                            alt="Imagen adjunta al mensaje"
+                            :alt="ui.attachedImage"
                             class="w-full h-full object-cover grayscale"
                         />
                       </div>
@@ -349,7 +337,7 @@
               <button
                   class="w-9 h-9 rounded-full flex items-center justify-center text-stone-400 hover:text-primary hover:bg-stone-100 transition-colors"
                   type="button"
-                  aria-label="Añadir archivo"
+                  :aria-label="ui.addFile"
               >
                 <span class="material-symbols-outlined text-xl" aria-hidden="true">
                   add_circle
@@ -358,10 +346,12 @@
 
               <!-- Caja de texto -->
               <textarea
+                  id="new-message"
+                  name="message"
                   v-model="newMessage"
                   class="social-input flex-1 bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-transparent resize-none placeholder-stone-400 min-h-[38px] max-h-24 overflow-y-auto px-3 py-2"
-                  placeholder="Escribe un mensaje..."
-                  aria-label="Escribe un mensaje"
+                  :placeholder="ui.writeMessage"
+                  :aria-label="ui.writeMessage"
                   rows="1"
                   @keydown.enter.exact.prevent="sendMessage"
               ></textarea>
@@ -370,7 +360,7 @@
               <button
                   class="w-9 h-9 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-900 hover:bg-stone-100 transition-colors"
                   type="button"
-                  aria-label="Añadir emoji"
+                  :aria-label="ui.addEmoji"
               >
                 <span class="material-symbols-outlined text-xl" aria-hidden="true">
                   mood
@@ -381,7 +371,7 @@
                   class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hover:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                   type="submit"
                   :disabled="sendingMessage || !newMessage.trim()"
-                  aria-label="Enviar mensaje"
+                  :aria-label="ui.sendMessage"
               >
                 <span class="material-symbols-outlined text-lg" aria-hidden="true">
                   send
@@ -399,6 +389,111 @@
 <script>
 import api from '@/services/api'
 import AppSidebar from '@/components/AppSidebar.vue'
+
+const messagesTexts = {
+  es: {
+    title: 'Mensajes',
+    newMessage: 'Crear nuevo mensaje',
+    closeNewMessage: 'Cerrar nuevo mensaje',
+    searchUser: 'Buscar usuario',
+    searchArtistPlaceholder: 'Buscar artista...',
+    searchingUsers: 'Buscando usuarios...',
+    noUsers: 'No hay usuarios para mostrar.',
+    loadingConversations: 'Cargando conversaciones...',
+    noConversations: 'Todavía no tienes conversaciones.',
+    noMessagesYet: 'Sin mensajes todavía.',
+    selectConversation: 'Selecciona una conversación',
+    selectConversationHelp: 'Pulsa el botón + para iniciar una conversación con otro artista.',
+    viewUserProfile: 'Ver perfil del usuario',
+    moreOptions: 'Más opciones',
+    loadingMessages: 'Cargando mensajes...',
+    emptyConversation: 'Todavía no hay mensajes en esta conversación.',
+    conversation: 'Conversación',
+    attachedImage: 'Imagen adjunta al mensaje',
+    addFile: 'Añadir archivo',
+    writeMessage: 'Escribe un mensaje...',
+    addEmoji: 'Añadir emoji',
+    sendMessage: 'Enviar mensaje',
+    user: 'Usuario',
+    errors: {
+      users: 'No se pudieron cargar los usuarios.',
+      startConversation: 'No se pudo iniciar la conversación.',
+      conversations: 'No se pudieron cargar las conversaciones.',
+      messages: 'No se pudieron cargar los mensajes de esta conversación.',
+      send: 'No se pudo enviar el mensaje.',
+    },
+    avatarOf: (name) => `Avatar de ${name}`,
+    profilePhotoOf: (name) => `Foto de perfil de ${name}`,
+  },
+  en: {
+    title: 'Messages',
+    newMessage: 'Create new message',
+    closeNewMessage: 'Close new message',
+    searchUser: 'Search user',
+    searchArtistPlaceholder: 'Search artist...',
+    searchingUsers: 'Searching users...',
+    noUsers: 'There are no users to display.',
+    loadingConversations: 'Loading conversations...',
+    noConversations: 'You do not have any conversations yet.',
+    noMessagesYet: 'No messages yet.',
+    selectConversation: 'Select a conversation',
+    selectConversationHelp: 'Press the + button to start a conversation with another artist.',
+    viewUserProfile: 'View user profile',
+    moreOptions: 'More options',
+    loadingMessages: 'Loading messages...',
+    emptyConversation: 'There are no messages in this conversation yet.',
+    conversation: 'Conversation',
+    attachedImage: 'Image attached to the message',
+    addFile: 'Add file',
+    writeMessage: 'Write a message...',
+    addEmoji: 'Add emoji',
+    sendMessage: 'Send message',
+    user: 'AMW User',
+    errors: {
+      users: 'Users could not be loaded.',
+      startConversation: 'The conversation could not be started.',
+      conversations: 'Conversations could not be loaded.',
+      messages: 'Messages from this conversation could not be loaded.',
+      send: 'The message could not be sent.',
+    },
+    avatarOf: (name) => `Avatar of ${name}`,
+    profilePhotoOf: (name) => `Profile photo of ${name}`,
+  },
+  fr: {
+    title: 'Messages',
+    newMessage: 'Créer un nouveau message',
+    closeNewMessage: 'Fermer le nouveau message',
+    searchUser: 'Rechercher un utilisateur',
+    searchArtistPlaceholder: 'Rechercher un artiste...',
+    searchingUsers: 'Recherche des utilisateurs...',
+    noUsers: 'Aucun utilisateur à afficher.',
+    loadingConversations: 'Chargement des conversations...',
+    noConversations: "Vous n'avez pas encore de conversations.",
+    noMessagesYet: 'Aucun message pour le moment.',
+    selectConversation: 'Sélectionnez une conversation',
+    selectConversationHelp: 'Appuyez sur le bouton + pour démarrer une conversation avec un autre artiste.',
+    viewUserProfile: "Voir le profil de l'utilisateur",
+    moreOptions: "Plus d'options",
+    loadingMessages: 'Chargement des messages...',
+    emptyConversation: "Il n'y a pas encore de messages dans cette conversation.",
+    conversation: 'Conversation',
+    attachedImage: 'Image jointe au message',
+    addFile: 'Ajouter un fichier',
+    writeMessage: 'Écrivez un message...',
+    addEmoji: 'Ajouter un emoji',
+    sendMessage: 'Envoyer le message',
+    user: 'Utilisateur AMW',
+    errors: {
+      users: "Les utilisateurs n'ont pas pu être chargés.",
+      startConversation: "La conversation n'a pas pu être démarrée.",
+      conversations: "Les conversations n'ont pas pu être chargées.",
+      messages: "Les messages de cette conversation n'ont pas pu être chargés.",
+      send: "Le message n'a pas pu être envoyé.",
+    },
+    avatarOf: (name) => `Avatar de ${name}`,
+    profilePhotoOf: (name) => `Photo de profil de ${name}`,
+  },
+}
 
 export default {
   name: 'MessagesPage',
@@ -435,6 +530,10 @@ export default {
   },
 
   computed: {
+    ui() {
+      return messagesTexts[this.$i18n.locale] || messagesTexts.es
+    },
+
     filteredConversations() {
       return this.conversations.filter((conversation) => {
         return this.getParticipantName(conversation)
@@ -504,7 +603,7 @@ export default {
         const payload = response.data
         this.users = payload.data || payload
       } catch (error) {
-        this.usersError = 'No se pudieron cargar los usuarios.'
+        this.usersError = this.ui.errors.users
       } finally {
         this.loadingUsers = false
       }
@@ -534,7 +633,7 @@ export default {
         if (error.response?.data?.message) {
           this.usersError = error.response.data.message
         } else {
-          this.usersError = 'No se pudo iniciar la conversación.'
+          this.usersError = this.ui.errors.startConversation
         }
       }
     },
@@ -549,8 +648,14 @@ export default {
 
         this.conversations = payload.data || payload
 
+        const requestedConversationId = Number(this.$route.query.conversation)
+
         if (selectFirst && this.conversations.length > 0 && !this.activeConversation) {
-          await this.selectConversation(this.conversations[0])
+          const requestedConversation = requestedConversationId
+            ? this.conversations.find((conversation) => conversation.id === requestedConversationId)
+            : null
+
+          await this.selectConversation(requestedConversation || this.conversations[0])
         }
 
         if (this.activeConversation) {
@@ -563,7 +668,7 @@ export default {
           }
         }
       } catch (error) {
-        this.conversationError = 'No se pudieron cargar las conversaciones.'
+        this.conversationError = this.ui.errors.conversations
       } finally {
         this.loadingConversations = false
       }
@@ -587,7 +692,7 @@ export default {
         await this.$nextTick()
         this.scrollToBottom()
       } catch (error) {
-        this.messageError = 'No se pudieron cargar los mensajes de esta conversación.'
+        this.messageError = this.ui.errors.messages
       } finally {
         this.loadingMessages = false
       }
@@ -619,7 +724,7 @@ export default {
 
         await this.loadConversations(false)
       } catch (error) {
-        this.messageError = 'No se pudo enviar el mensaje.'
+        this.messageError = this.ui.errors.send
       } finally {
         this.sendingMessage = false
       }
@@ -656,7 +761,7 @@ export default {
       return (
           participant?.profile?.artistic_name ||
           participant?.name ||
-          'Usuario AMW'
+          this.ui.user
       )
     },
 
@@ -694,12 +799,12 @@ export default {
           message.sender?.profile?.artistic_name ||
           message.sender?.name ||
           this.getParticipantName(this.activeConversation) ||
-          'Usuario AMW'
+          this.ui.user
       )
     },
 
     getUserName(user) {
-      return user.profile?.artistic_name || user.name || 'Usuario AMW'
+      return user.profile?.artistic_name || user.name || this.ui.user
     },
 
     getUserAvatar(user) {
@@ -719,7 +824,13 @@ export default {
         return ''
       }
 
-      return new Date(date).toLocaleDateString('es-ES', {
+      const locales = {
+        es: 'es-ES',
+        en: 'en-US',
+        fr: 'fr-FR',
+      }
+
+      return new Date(date).toLocaleDateString(locales[this.$i18n.locale] || 'es-ES', {
         day: '2-digit',
         month: 'short',
       })
@@ -730,7 +841,13 @@ export default {
         return ''
       }
 
-      return new Date(date).toLocaleTimeString('es-ES', {
+      const locales = {
+        es: 'es-ES',
+        en: 'en-US',
+        fr: 'fr-FR',
+      }
+
+      return new Date(date).toLocaleTimeString(locales[this.$i18n.locale] || 'es-ES', {
         hour: '2-digit',
         minute: '2-digit',
       })

@@ -21,7 +21,7 @@
           <img
               class="w-full h-full object-cover grayscale opacity-70 mix-blend-multiply"
               :src="heroImage"
-              alt="Imagen de cabecera"
+              :alt="ui.headerImage"
           />
           <div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface/80"></div>
         </div>
@@ -32,7 +32,7 @@
               <img
                   class="w-full h-full object-cover"
                   :src="userProfileImage"
-                  alt="Imagen de perfil"
+                  :alt="ui.profileImage"
               />
             </div>
           </div>
@@ -43,13 +43,13 @@
             </h2>
 
             <p class="font-manrope text-sm text-stone-500 uppercase tracking-widest">
-              {{ profile.specialty || 'Artista AMW' }}
+              {{ profile.specialty || ui.artist }}
             </p>
 
             <div class="flex gap-8 mt-6">
               <div class="flex flex-col">
                 <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
-                  Obras
+                  {{ ui.works }}
                 </span>
                 <span class="font-notoSerif text-2xl">
                   {{ userWorksCount }}
@@ -58,7 +58,7 @@
 
               <div class="flex flex-col">
                 <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
-                  Seguidores
+                  {{ ui.followers }}
                 </span>
                 <span class="font-notoSerif text-2xl">
                   {{ userFollowers }}
@@ -67,7 +67,7 @@
 
               <div class="flex flex-col">
                 <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
-                  Siguiendo
+                  {{ ui.following }}
                 </span>
                 <span class="font-notoSerif text-2xl">
                   {{ userFollowing }}
@@ -101,11 +101,11 @@
           <div class="flex justify-between items-start mb-10">
             <div>
               <p class="font-manrope text-[10px] uppercase tracking-[0.3em] text-primary mb-3">
-                Configuración del perfil
+                {{ ui.profileSettings }}
               </p>
 
               <h3 class="font-notoSerif text-4xl italic text-on-surface">
-                Editar perfil artístico
+                {{ ui.editArtisticProfile }}
               </h3>
             </div>
 
@@ -114,18 +114,20 @@
                 type="button"
                 @click="toggleEditForm"
             >
-              Cerrar
+              {{ ui.close }}
             </button>
           </div>
 
           <form @submit.prevent="saveProfile" class="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div class="space-y-8">
               <div>
-                <label class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
-                  Nombre artístico
+                <label for="profile-artistic-name" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                  {{ ui.artisticName }}
                 </label>
 
                 <input
+                    id="profile-artistic-name"
+                    name="artistic_name"
                     v-model="profile.artistic_name"
                     class="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 focus:ring-0 focus:border-primary font-manrope"
                     type="text"
@@ -134,37 +136,43 @@
               </div>
 
               <div>
-                <label class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
-                  Especialidad
+                <label for="profile-specialty" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                  {{ ui.specialty }}
                 </label>
 
                 <input
+                    id="profile-specialty"
+                    name="specialty"
                     v-model="profile.specialty"
                     class="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 focus:ring-0 focus:border-primary font-manrope"
                     type="text"
-                    placeholder="Arte digital, ilustración, pintura..."
+                    :placeholder="ui.specialtyPlaceholder"
                 />
               </div>
 
               <div>
-                <label class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
-                  Biografía
+                <label for="profile-biography" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                  {{ ui.biography }}
                 </label>
 
                 <textarea
+                    id="profile-biography"
+                    name="biography"
                     v-model="profile.biography"
                     class="w-full bg-transparent border border-outline-variant p-4 focus:ring-0 focus:border-primary font-manrope"
                     rows="7"
-                    placeholder="Describe tu trayectoria artística, intereses y estilo..."
+                    :placeholder="ui.biographyPlaceholder"
                 ></textarea>
               </div>
 
               <div>
-                <label class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
-                  Imagen de perfil
+                <label for="profile-image" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                  {{ ui.profileImageLabel }}
                 </label>
 
                 <input
+                    id="profile-image"
+                    name="profile_image"
                     type="file"
                     accept="image/*"
                     @change="handleImageChange"
@@ -175,11 +183,13 @@
 
             <div class="space-y-8">
               <div>
-                <label class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                <label for="profile-instagram" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
                   Instagram
                 </label>
 
                 <input
+                    id="profile-instagram"
+                    name="instagram"
                     v-model="profile.social_links.instagram"
                     class="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 focus:ring-0 focus:border-primary font-manrope"
                     type="text"
@@ -188,11 +198,13 @@
               </div>
 
               <div>
-                <label class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                <label for="profile-behance" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
                   Behance
                 </label>
 
                 <input
+                    id="profile-behance"
+                    name="behance"
                     v-model="profile.social_links.behance"
                     class="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 focus:ring-0 focus:border-primary font-manrope"
                     type="text"
@@ -201,11 +213,13 @@
               </div>
 
               <div>
-                <label class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
-                  Web personal
+                <label for="profile-website" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                  {{ ui.website }}
                 </label>
 
                 <input
+                    id="profile-website"
+                    name="website"
                     v-model="profile.social_links.website"
                     class="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 focus:ring-0 focus:border-primary font-manrope"
                     type="text"
@@ -214,11 +228,13 @@
               </div>
 
               <div>
-                <label class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                <label for="profile-tiktok" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
                   TikTok
                 </label>
 
                 <input
+                    id="profile-tiktok"
+                    name="tiktok"
                     v-model="profile.social_links.tiktok"
                     class="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 focus:ring-0 focus:border-primary font-manrope"
                     type="text"
@@ -227,11 +243,13 @@
               </div>
 
               <div>
-                <label class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                <label for="profile-youtube" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
                   YouTube
                 </label>
 
                 <input
+                    id="profile-youtube"
+                    name="youtube"
                     v-model="profile.social_links.youtube"
                     class="w-full bg-transparent border-0 border-b border-outline-variant py-3 px-0 focus:ring-0 focus:border-primary font-manrope"
                     type="text"
@@ -246,7 +264,7 @@
                   type="button"
                   @click="toggleEditForm"
               >
-                Cancelar
+                {{ ui.cancel }}
               </button>
 
               <button
@@ -254,7 +272,7 @@
                   type="submit"
                   :disabled="loading"
               >
-                {{ loading ? 'Guardando...' : 'Guardar cambios' }}
+                {{ loading ? ui.saving : ui.saveChanges }}
               </button>
             </div>
           </form>
@@ -265,27 +283,27 @@
       <section class="px-24 mb-32 grid grid-cols-12 gap-12">
         <div class="col-span-4 sticky top-48 self-start">
           <p class="font-manrope text-[10px] uppercase tracking-[0.3em] text-primary mb-6">
-            Descripción
+            {{ ui.description }}
           </p>
 
           <div class="font-notoSerif text-lg leading-relaxed text-on-surface-variant italic border-l-2 border-primary/20 pl-8">
-            "{{ profile.biography || 'Añade una biografía para presentar tu trabajo artístico dentro de AMW.' }}"
+            "{{ profile.biography || ui.emptyBiography }}"
           </div>
 
           <div class="mt-12 space-y-8">
-            <button
-                class="w-full py-4 px-12 bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10"
-                type="button"
+            <router-link
+                to="/messages"
+                class="block w-full text-center py-4 px-12 bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10"
             >
-              Contactar
-            </button>
+              {{ ui.messages }}
+            </router-link>
 
             <button
                 class="w-full py-4 px-12 border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
                 type="button"
                 @click="toggleEditForm"
             >
-              {{ isEditing ? 'Ocultar edición' : 'Editar perfil' }}
+              {{ isEditing ? ui.hideEditing : ui.editProfile }}
             </button>
 
             <div class="flex gap-4">
@@ -293,6 +311,8 @@
                   v-if="profile.social_links.website"
                   :href="profile.social_links.website"
                   target="_blank"
+                  rel="noopener noreferrer"
+                  :aria-label="ui.website"
                   class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
               >
                 language
@@ -302,6 +322,8 @@
                   v-if="profile.social_links.instagram"
                   :href="profile.social_links.instagram"
                   target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
                   class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
               >
                 share
@@ -313,30 +335,35 @@
         <!-- Gallery -->
         <div class="col-span-8">
           <p class="font-manrope text-[10px] uppercase tracking-[0.3em] text-stone-400 mb-12">
-            Obras seleccionadas
+            {{ ui.selectedWorks }}
           </p>
 
           <div v-if="loading && artworks.length === 0" class="font-manrope text-sm text-stone-500">
-            Cargando perfil...
+            {{ ui.loadingProfile }}
           </div>
 
           <div v-else-if="artworks.length === 0" class="bg-surface-container-low p-12 border border-outline-variant/20">
             <p class="font-notoSerif text-2xl italic mb-4">
-              Todavía no tienes obras publicadas.
+              {{ ui.emptyWorksTitle }}
             </p>
 
             <p class="font-manrope text-sm text-stone-500">
-              Cuando crees publicaciones en AMW, aparecerán aquí como parte de tu portfolio.
+              {{ ui.emptyWorksText }}
             </p>
           </div>
 
           <div v-else class="grid grid-cols-2 gap-16">
-            <div
+            <article
                 v-for="artwork in artworks"
                 :key="artwork.id"
                 class="space-y-6"
             >
-              <div class="bg-surface-container aspect-[3/4] relative overflow-hidden group">
+              <button
+                  type="button"
+                  class="block w-full bg-surface-container aspect-[3/4] relative overflow-hidden group"
+                  :aria-label="`${ui.viewArtwork}: ${artwork.title}`"
+                  @click="goToPost(artwork.id)"
+              >
                 <img
                     class="w-full h-full object-cover transition-all duration-700 cursor-pointer"
                     :src="artwork.image"
@@ -345,10 +372,10 @@
 
                 <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white px-4 py-2">
-                    Ver obra
+                    {{ ui.viewArtwork }}
                   </span>
                 </div>
-              </div>
+              </button>
 
               <div class="flex justify-between items-baseline">
                 <h3 class="font-notoSerif text-xl italic">
@@ -359,16 +386,16 @@
                   {{ artwork.year }} • {{ artwork.medium }}
                 </span>
               </div>
-            </div>
+            </article>
           </div>
 
           <div class="mt-32 flex justify-center">
-            <button
-                class="px-16 py-4 border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
-                type="button"
+            <router-link
+                to="/feed"
+                class="inline-block px-16 py-4 border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
             >
-              Ver portfolio completo
-            </button>
+              {{ ui.viewFullPortfolio }}
+            </router-link>
           </div>
         </div>
       </section>
@@ -382,8 +409,7 @@
             </h4>
 
             <p class="font-manrope text-sm text-stone-500 leading-relaxed">
-              Un espacio digital dedicado a la intersección entre las bellas artes y la cultura digital moderna.
-              Celebramos al artista como arquitecto principal de la sociedad.
+              {{ ui.footerDescription }}
             </p>
           </div>
         </div>
@@ -401,6 +427,126 @@ import {
 
 import { getMyPosts } from '@/services/postService'
 import { logoutUser } from '@/services/authService'
+
+const profileTexts = {
+  es: {
+    headerImage: 'Imagen de cabecera del portfolio',
+    profileImage: 'Imagen de perfil',
+    artist: 'Artista AMW',
+    works: 'Obras',
+    followers: 'Seguidores',
+    following: 'Siguiendo',
+    profileSettings: 'Configuración del perfil',
+    editArtisticProfile: 'Editar perfil artístico',
+    close: 'Cerrar',
+    artisticName: 'Nombre artístico',
+    specialty: 'Especialidad',
+    specialtyPlaceholder: 'Arte digital, ilustración, pintura...',
+    biography: 'Biografía',
+    biographyPlaceholder: 'Describe tu trayectoria artística, intereses y estilo...',
+    profileImageLabel: 'Imagen de perfil',
+    website: 'Web personal',
+    cancel: 'Cancelar',
+    saving: 'Guardando...',
+    saveChanges: 'Guardar cambios',
+    description: 'Descripción',
+    emptyBiography: 'Añade una biografía para presentar tu trabajo artístico dentro de AMW.',
+    messages: 'Mensajes',
+    hideEditing: 'Ocultar edición',
+    editProfile: 'Editar perfil',
+    selectedWorks: 'Obras seleccionadas',
+    loadingProfile: 'Cargando perfil...',
+    emptyWorksTitle: 'Todavía no tienes obras publicadas.',
+    emptyWorksText: 'Cuando crees publicaciones en AMW, aparecerán aquí como parte de tu portfolio.',
+    viewArtwork: 'Ver obra',
+    viewFullPortfolio: 'Ver más publicaciones',
+    artwork: 'Obra',
+    footerDescription: 'Un espacio digital dedicado a la intersección entre las bellas artes y la cultura digital moderna. Celebramos al artista como arquitecto principal de la sociedad.',
+    profileLoadedError: 'No se pudo cargar el perfil.',
+    profileUpdated: 'Perfil actualizado correctamente.',
+    profileUpdateError: 'No se pudo actualizar el perfil.',
+    imageUpdated: 'Imagen de perfil actualizada correctamente.',
+    imageError: 'No se pudo subir la imagen.',
+  },
+  en: {
+    headerImage: 'Portfolio header image',
+    profileImage: 'Profile image',
+    artist: 'AMW Artist',
+    works: 'Artworks',
+    followers: 'Followers',
+    following: 'Following',
+    profileSettings: 'Profile settings',
+    editArtisticProfile: 'Edit artistic profile',
+    close: 'Close',
+    artisticName: 'Artistic name',
+    specialty: 'Specialty',
+    specialtyPlaceholder: 'Digital art, illustration, painting...',
+    biography: 'Biography',
+    biographyPlaceholder: 'Describe your artistic career, interests and style...',
+    profileImageLabel: 'Profile image',
+    website: 'Personal website',
+    cancel: 'Cancel',
+    saving: 'Saving...',
+    saveChanges: 'Save changes',
+    description: 'Description',
+    emptyBiography: 'Add a biography to introduce your artistic work on AMW.',
+    messages: 'Messages',
+    hideEditing: 'Hide editing',
+    editProfile: 'Edit profile',
+    selectedWorks: 'Selected artworks',
+    loadingProfile: 'Loading profile...',
+    emptyWorksTitle: 'You do not have published artworks yet.',
+    emptyWorksText: 'When you create publications on AMW, they will appear here as part of your portfolio.',
+    viewArtwork: 'View artwork',
+    viewFullPortfolio: 'View more publications',
+    artwork: 'Artwork',
+    footerDescription: 'A digital space dedicated to the intersection of fine arts and modern digital culture. We celebrate the artist as a principal architect of society.',
+    profileLoadedError: 'The profile could not be loaded.',
+    profileUpdated: 'Profile updated successfully.',
+    profileUpdateError: 'The profile could not be updated.',
+    imageUpdated: 'Profile image updated successfully.',
+    imageError: 'The image could not be uploaded.',
+  },
+  fr: {
+    headerImage: 'Image d’en-tête du portfolio',
+    profileImage: 'Image de profil',
+    artist: 'Artiste AMW',
+    works: 'Œuvres',
+    followers: 'Abonnés',
+    following: 'Abonnements',
+    profileSettings: 'Configuration du profil',
+    editArtisticProfile: 'Modifier le profil artistique',
+    close: 'Fermer',
+    artisticName: 'Nom artistique',
+    specialty: 'Spécialité',
+    specialtyPlaceholder: 'Art numérique, illustration, peinture...',
+    biography: 'Biographie',
+    biographyPlaceholder: 'Décrivez votre parcours artistique, vos intérêts et votre style...',
+    profileImageLabel: 'Image de profil',
+    website: 'Site personnel',
+    cancel: 'Annuler',
+    saving: 'Enregistrement...',
+    saveChanges: 'Enregistrer',
+    description: 'Description',
+    emptyBiography: 'Ajoutez une biographie pour présenter votre travail artistique sur AMW.',
+    messages: 'Messages',
+    hideEditing: 'Masquer la modification',
+    editProfile: 'Modifier le profil',
+    selectedWorks: 'Œuvres sélectionnées',
+    loadingProfile: 'Chargement du profil...',
+    emptyWorksTitle: 'Vous n’avez pas encore publié d’œuvres.',
+    emptyWorksText: 'Lorsque vous créerez des publications sur AMW, elles apparaîtront ici dans votre portfolio.',
+    viewArtwork: 'Voir l’œuvre',
+    viewFullPortfolio: 'Voir plus de publications',
+    artwork: 'Œuvre',
+    footerDescription: 'Un espace numérique dédié à la rencontre entre les beaux-arts et la culture numérique moderne. Nous célébrons l’artiste comme un architecte essentiel de la société.',
+    profileLoadedError: 'Le profil n’a pas pu être chargé.',
+    profileUpdated: 'Profil mis à jour correctement.',
+    profileUpdateError: 'Le profil n’a pas pu être mis à jour.',
+    imageUpdated: 'Image de profil mise à jour correctement.',
+    imageError: 'L’image n’a pas pu être téléchargée.',
+  },
+}
 
 export default {
   name: 'ProfilePage',
@@ -439,12 +585,32 @@ export default {
     }
   },
 
+  computed: {
+    ui() {
+      return profileTexts[this.$i18n.locale] || profileTexts.es
+    },
+  },
+
   async mounted() {
+    window.addEventListener('amw-post-created', this.handlePostCreated)
+
     await this.loadProfile()
     await this.loadMyPosts()
   },
 
+  beforeUnmount() {
+    window.removeEventListener('amw-post-created', this.handlePostCreated)
+  },
+
   methods: {
+    handlePostCreated() {
+      this.loadMyPosts()
+    },
+
+    goToPost(postId) {
+      this.$router.push(`/posts/${postId}`)
+    },
+
     toggleEditForm() {
       this.isEditing = !this.isEditing
       this.successMessage = ''
@@ -468,7 +634,7 @@ export default {
           },
         }
 
-        this.userName = data.artistic_name || 'Artista AMW'
+        this.userName = data.artistic_name || this.ui.artist
         this.userProfileImage = data.profile_image_url || this.userProfileImage
       } catch (error) {
         if (error.response?.status === 401) {
@@ -478,7 +644,7 @@ export default {
           return
         }
 
-        this.errorMessage = 'No se pudo cargar el perfil.'
+        this.errorMessage = this.ui.profileLoadedError
       } finally {
         this.loading = false
       }
@@ -496,7 +662,7 @@ export default {
           year: post.created_at
               ? new Date(post.created_at).getFullYear()
               : new Date().getFullYear(),
-          medium: post.category?.name || post.type || 'Obra',
+          medium: post.category?.name || post.type || this.ui.artwork,
         }))
 
         this.userWorksCount = this.artworks.length
@@ -531,13 +697,13 @@ export default {
         }
 
         this.userName = data.artistic_name || this.userName
-        this.successMessage = 'Perfil actualizado correctamente.'
+        this.successMessage = this.ui.profileUpdated
         this.isEditing = false
       } catch (error) {
         if (error.response?.data?.message) {
           this.errorMessage = error.response.data.message
         } else {
-          this.errorMessage = 'No se pudo actualizar el perfil.'
+          this.errorMessage = this.ui.profileUpdateError
         }
       } finally {
         this.loading = false
@@ -560,9 +726,9 @@ export default {
 
         this.profile.profile_image_url = response.data.profile_image_url
         this.userProfileImage = response.data.profile_image_url
-        this.successMessage = 'Imagen de perfil actualizada correctamente.'
+        this.successMessage = this.ui.imageUpdated
       } catch (error) {
-        this.errorMessage = 'No se pudo subir la imagen.'
+        this.errorMessage = this.ui.imageError
       } finally {
         this.loading = false
       }

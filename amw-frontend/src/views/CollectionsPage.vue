@@ -10,15 +10,15 @@
     <AppTopBar @logout="handleLogout" />
 
     <!-- Main Content -->
-    <main class="ml-20 pt-32 pb-24 px-12 max-w-6xl">
+    <main class="ml-20 pt-28 sm:pt-32 pb-24 px-4 sm:px-8 lg:px-12 max-w-6xl">
       <!-- Hero Title -->
-      <section class="mb-24 mt-12">
-        <h1 class="font-notoSerif italic text-[4rem] text-on-surface tracking-tighter">
-          Tableros
+      <section class="mb-16 sm:mb-24 mt-8 sm:mt-12">
+        <h1 class="font-notoSerif italic text-5xl sm:text-[4rem] text-on-surface tracking-tighter">
+          {{ ui.boards }}
         </h1>
 
         <p class="font-manrope uppercase tracking-[0.3em] text-[10px] text-primary mt-2">
-          Colecciones personales • Archivo AMW
+          {{ ui.subtitle }}
         </p>
       </section>
 
@@ -32,14 +32,14 @@
 
       <!-- Collection: Likes -->
       <section class="bg-surface-container-low shadow-sm rounded-xl hover:shadow-md transition-shadow mb-16 p-6">
-        <div class="flex items-end justify-between mb-8 border-b border-outline-variant/15 pb-4">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 border-b border-outline-variant/15 pb-4">
           <div>
             <h2 class="font-notoSerif text-4xl italic text-on-surface">
-              Likes
+              {{ ui.likes }}
             </h2>
 
             <p class="font-manrope uppercase tracking-widest text-[10px] text-stone-500 mt-2">
-              {{ filteredLikedPosts.length }} publicaciones • Guardadas por ti
+              {{ filteredLikedPosts.length }} {{ ui.savedPosts }}
             </p>
           </div>
 
@@ -49,7 +49,7 @@
               :disabled="likedPosts.length === 0"
               @click="scrollToAllLikes"
           >
-            Ver todo
+            {{ ui.viewAll }}
             <span class="material-symbols-outlined transition-transform group-hover:translate-x-2" aria-hidden="true">
               arrow_forward
             </span>
@@ -57,30 +57,30 @@
         </div>
 
         <div v-if="loading" class="font-manrope text-sm text-stone-500 py-12">
-          Cargando tus publicaciones favoritas...
+          {{ ui.loading }}
         </div>
 
-        <div v-else-if="filteredLikedPosts.length === 0" class="grid grid-cols-12 gap-8">
-          <div class="col-span-8 relative aspect-[16/9] border border-dashed border-outline-variant/50 rounded-lg flex items-center justify-center group cursor-pointer hover:bg-surface-container-high/50 transition-colors">
+        <div v-else-if="filteredLikedPosts.length === 0" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div class="col-span-1 lg:col-span-8 relative aspect-[16/9] border border-dashed border-outline-variant/50 rounded-lg flex items-center justify-center group cursor-pointer hover:bg-surface-container-high/50 transition-colors">
             <div class="text-center">
               <span class="material-symbols-outlined text-4xl text-outline-variant/60 group-hover:text-primary transition-colors" aria-hidden="true">
                 favorite
               </span>
 
               <p class="font-manrope text-[10px] uppercase tracking-widest text-outline-variant mt-2">
-                Todavía no has dado like a ninguna publicación
+                {{ ui.emptyLikes }}
               </p>
 
               <router-link
                   to="/feed"
                   class="inline-flex mt-4 text-primary font-manrope font-bold uppercase tracking-widest text-[10px] hover:underline"
               >
-                Ir al feed
+                {{ ui.goToFeed }}
               </router-link>
             </div>
           </div>
 
-          <div class="col-span-4 space-y-8">
+          <div class="col-span-1 lg:col-span-4 grid grid-cols-2 lg:block lg:space-y-8 gap-4 lg:gap-0">
             <div class="aspect-square border border-dashed border-outline-variant/50 rounded-lg flex items-center justify-center group hover:bg-surface-container-high/50 transition-colors">
               <span class="material-symbols-outlined text-2xl text-outline-variant/60 group-hover:text-primary transition-colors" aria-hidden="true">
                 add
@@ -95,15 +95,15 @@
           </div>
         </div>
 
-        <div v-else class="grid grid-cols-12 gap-8">
+        <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <!-- Featured liked post -->
           <article
-              class="col-span-8 relative aspect-[16/9] rounded-lg overflow-hidden bg-stone-200 group cursor-pointer"
+              class="col-span-1 lg:col-span-8 relative aspect-[16/9] rounded-lg overflow-hidden bg-stone-200 group cursor-pointer"
               @click="goToPost(featuredPost.id)"
           >
             <img
                 :src="featuredPost.image_url || fallbackImage"
-                :alt="`Imagen de ${featuredPost.title}`"
+                :alt="`${ui.imageOf} ${featuredPost.title}`"
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
 
@@ -111,7 +111,7 @@
 
             <div class="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/70 to-transparent text-white">
               <p class="font-manrope text-[10px] uppercase tracking-widest text-white/70 mb-2">
-                {{ featuredPost.category?.name || featuredPost.type || 'Publicación AMW' }}
+                {{ featuredPost.category?.name || typeLabel(featuredPost.type) }}
               </p>
 
               <h3 class="font-notoSerif text-3xl italic">
@@ -119,7 +119,7 @@
               </h3>
 
               <p class="font-manrope text-sm text-white/80 mt-2 line-clamp-2">
-                {{ featuredPost.description || 'Sin descripción disponible.' }}
+                {{ featuredPost.description || ui.noDescription }}
               </p>
             </div>
 
@@ -129,7 +129,7 @@
                   type="button"
                   @click.stop="removeLike(featuredPost)"
               >
-                Quitar like
+                {{ ui.removeLike }}
               </button>
 
               <button
@@ -137,13 +137,13 @@
                   type="button"
                   @click.stop="goToPost(featuredPost.id)"
               >
-                Ver más
+                {{ ui.viewMore }}
               </button>
             </div>
           </article>
 
           <!-- Side liked posts -->
-          <div class="col-span-4 space-y-8">
+          <div class="col-span-1 lg:col-span-4 grid grid-cols-2 lg:block lg:space-y-8 gap-4 lg:gap-0">
             <article
                 v-for="post in sidePosts"
                 :key="post.id"
@@ -152,7 +152,7 @@
             >
               <img
                   :src="post.image_url || fallbackImage"
-                  :alt="`Imagen de ${post.title}`"
+                  :alt="`${ui.imageOf} ${post.title}`"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
 
@@ -164,7 +164,7 @@
                 </h3>
 
                 <p class="font-manrope text-[10px] uppercase tracking-widest text-white/70 mt-1">
-                  {{ post.category?.name || post.type || 'AMW' }}
+                  {{ post.category?.name || typeLabel(post.type) }}
                 </p>
               </div>
 
@@ -174,7 +174,7 @@
                     type="button"
                     @click.stop="removeLike(post)"
                 >
-                  Quitar
+                  {{ ui.remove }}
                 </button>
               </div>
             </article>
@@ -200,11 +200,11 @@
         <div class="flex items-end justify-between mb-8">
           <div>
             <h2 class="font-notoSerif text-4xl italic">
-              Todos tus likes
+              {{ ui.allLikes }}
             </h2>
 
             <p class="font-manrope text-sm text-stone-500 mt-2">
-              Publicaciones que has marcado como favoritas.
+              {{ ui.favourites }}
             </p>
           </div>
         </div>
@@ -221,7 +221,7 @@
             >
               <img
                   :src="post.image_url || fallbackImage"
-                  :alt="`Imagen de ${post.title}`"
+                  :alt="`${ui.imageOf} ${post.title}`"
                   class="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-[1.03]"
               />
 
@@ -233,7 +233,7 @@
                     type="button"
                     @click.stop="removeLike(post)"
                 >
-                  Quitar like
+                  {{ ui.removeLike }}
                 </button>
 
                 <button
@@ -241,14 +241,14 @@
                     type="button"
                     @click.stop="goToPost(post.id)"
                 >
-                  Info
+                  {{ ui.info }}
                 </button>
               </div>
             </div>
 
             <div class="p-5">
               <p class="font-manrope uppercase tracking-widest text-[10px] text-primary font-bold mb-2">
-                {{ post.category?.name || post.type || 'Sin categoría' }}
+                {{ post.category?.name || typeLabel(post.type) }}
               </p>
 
               <h3 class="font-notoSerif text-2xl italic mb-2">
@@ -256,7 +256,7 @@
               </h3>
 
               <p class="font-manrope text-sm text-stone-600 line-clamp-3">
-                {{ post.description || 'Esta publicación no tiene descripción.' }}
+                {{ post.description || ui.noDescription }}
               </p>
 
               <div class="mt-5 pt-4 border-t border-outline-variant/20 flex justify-between items-center">
@@ -278,29 +278,29 @@
         <div class="inline-block relative">
           <router-link
               to="/feed"
-              class="font-notoSerif italic text-3xl px-20 border border-outline/10 hover:border-primary/50 transition-colors group py-8 inline-block"
+              class="font-notoSerif italic text-2xl sm:text-3xl px-6 sm:px-20 border border-outline/10 hover:border-primary/50 transition-colors group py-8 inline-block"
           >
-            Ver más publicaciones AMW
+            {{ ui.morePublications }}
             <div class="absolute inset-0 bg-primary/5 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
           </router-link>
         </div>
 
-        <div class="mt-24 border-t border-outline/10 pt-12 flex justify-between items-center text-stone-400">
+        <div class="mt-24 border-t border-outline/10 pt-12 flex flex-col sm:flex-row gap-6 justify-between items-center text-stone-400">
           <p class="font-manrope text-[10px] uppercase tracking-[0.2em]">
             © 2026 Art Makes A Way Archive
           </p>
 
           <div class="flex gap-8 font-manrope text-[10px] uppercase tracking-[0.2em]">
             <router-link class="hover:text-primary transition-colors" to="/terms">
-              Términos
+              {{ ui.terms }}
             </router-link>
 
             <router-link class="hover:text-primary transition-colors" to="/help">
-              Ayuda
+              {{ ui.help }}
             </router-link>
 
             <router-link class="hover:text-primary transition-colors" to="/profile">
-              Perfil
+              {{ ui.profile }}
             </router-link>
           </div>
         </div>
@@ -314,6 +314,107 @@ import {
   getMyLikes,
   unlikePost,
 } from '@/services/postService'
+import { logoutUser } from '@/services/authService'
+
+const collectionTexts = {
+  es: {
+    boards: 'Tableros',
+    subtitle: 'Colecciones personales • Archivo AMW',
+    likes: 'Likes',
+    savedPosts: 'publicaciones • Guardadas por ti',
+    viewAll: 'Ver todo',
+    loading: 'Cargando tus publicaciones favoritas...',
+    emptyLikes: 'Todavía no has dado like a ninguna publicación',
+    goToFeed: 'Ir al feed',
+    publication: 'Publicación AMW',
+    noDescription: 'Sin descripción disponible.',
+    removeLike: 'Quitar like',
+    viewMore: 'Ver más',
+    remove: 'Quitar',
+    allLikes: 'Todos tus likes',
+    favourites: 'Publicaciones que has marcado como favoritas.',
+    info: 'Info',
+    morePublications: 'Ver más publicaciones AMW',
+    terms: 'Términos',
+    help: 'Ayuda',
+    profile: 'Perfil',
+    imageOf: 'Imagen de',
+    noDate: 'Sin fecha',
+    artist: 'Artista AMW',
+    artwork: 'Obra',
+    event: 'Evento',
+    product: 'Producto',
+    errors: {
+      load: 'No se pudieron cargar tus likes.',
+      remove: 'No se pudo quitar el like de esta publicación.',
+    },
+  },
+  en: {
+    boards: 'Boards',
+    subtitle: 'Personal collections • AMW Archive',
+    likes: 'Likes',
+    savedPosts: 'publications • Saved by you',
+    viewAll: 'View all',
+    loading: 'Loading your favourite publications...',
+    emptyLikes: 'You have not liked any publications yet',
+    goToFeed: 'Go to feed',
+    publication: 'AMW Publication',
+    noDescription: 'No description available.',
+    removeLike: 'Remove like',
+    viewMore: 'View more',
+    remove: 'Remove',
+    allLikes: 'All your likes',
+    favourites: 'Publications you have marked as favourites.',
+    info: 'Info',
+    morePublications: 'View more AMW publications',
+    terms: 'Terms',
+    help: 'Help',
+    profile: 'Profile',
+    imageOf: 'Image of',
+    noDate: 'No date',
+    artist: 'AMW Artist',
+    artwork: 'Artwork',
+    event: 'Event',
+    product: 'Product',
+    errors: {
+      load: 'Your likes could not be loaded.',
+      remove: 'The like could not be removed from this publication.',
+    },
+  },
+  fr: {
+    boards: 'Tableaux',
+    subtitle: 'Collections personnelles • Archive AMW',
+    likes: 'J’aime',
+    savedPosts: 'publications • Enregistrées par vous',
+    viewAll: 'Tout voir',
+    loading: 'Chargement de vos publications favorites...',
+    emptyLikes: 'Vous n’avez encore aimé aucune publication',
+    goToFeed: 'Aller au fil',
+    publication: 'Publication AMW',
+    noDescription: 'Aucune description disponible.',
+    removeLike: 'Retirer le j’aime',
+    viewMore: 'Voir plus',
+    remove: 'Retirer',
+    allLikes: 'Tous vos j’aime',
+    favourites: 'Publications que vous avez marquées comme favorites.',
+    info: 'Info',
+    morePublications: 'Voir plus de publications AMW',
+    terms: 'Conditions',
+    help: 'Assistance',
+    profile: 'Profil',
+    imageOf: 'Image de',
+    noDate: 'Sans date',
+    artist: 'Artiste AMW',
+    artwork: 'Œuvre',
+    event: 'Événement',
+    product: 'Produit',
+    errors: {
+      load: 'Vos j’aime n’ont pas pu être chargés.',
+      remove: 'Le j’aime n’a pas pu être retiré de cette publication.',
+    },
+  },
+}
+
 export default {
   name: 'CollectionsPage',
 
@@ -324,14 +425,14 @@ export default {
       errorMessage: '',
       search: '',
       fallbackImage: 'https://placehold.co/900x700?text=AMW',
-
-      userProfileImage: 'https://placehold.co/400x500?text=AMW',
-      userName: 'Artista AMW',
-      profile: {},
     }
   },
 
   computed: {
+    ui() {
+      return collectionTexts[this.$i18n.locale] || collectionTexts.es
+    },
+
     filteredLikedPosts() {
       const searchText = this.search.toLowerCase().trim()
 
@@ -340,7 +441,11 @@ export default {
       }
 
       return this.likedPosts.filter((post) => {
-        const text = `${post.title || ''} ${post.description || ''} ${post.type || ''} ${post.category?.name || ''} ${this.getAuthorName(post)}`.toLowerCase()
+        const hashtags = Array.isArray(post.hashtags)
+          ? post.hashtags.join(' ')
+          : ''
+
+        const text = `${post.title || ''} ${post.description || ''} ${post.type || ''} ${post.category?.name || ''} ${hashtags} ${this.getAuthorName(post)}`.toLowerCase()
 
         return text.includes(searchText)
       })
@@ -369,7 +474,7 @@ export default {
         const result = await getMyLikes()
         this.likedPosts = result.posts
       } catch (error) {
-        this.errorMessage = 'No se pudieron cargar tus likes.'
+        this.errorMessage = this.ui.errors.load
       } finally {
         this.loading = false
       }
@@ -381,7 +486,7 @@ export default {
 
         this.likedPosts = this.likedPosts.filter((item) => item.id !== post.id)
       } catch (error) {
-        this.errorMessage = 'No se pudo quitar el like de esta publicación.'
+        this.errorMessage = this.ui.errors.remove
       }
     },
 
@@ -405,22 +510,43 @@ export default {
           post.author?.name ||
           post.user?.profile?.artistic_name ||
           post.user?.name ||
-          'Artista AMW'
+          this.ui.artist
       )
     },
 
-    handleLogout() {
-      localStorage.removeItem('amw_token')
-      localStorage.removeItem('amw_user')
+    typeLabel(type) {
+      const labels = {
+        obra: this.ui.artwork,
+        evento: this.ui.event,
+        producto: this.ui.product,
+      }
+
+      return labels[type] || this.ui.publication
+    },
+
+    async handleLogout() {
+      try {
+        await logoutUser()
+      } catch (error) {
+        localStorage.removeItem('amw_token')
+        localStorage.removeItem('amw_user')
+      }
+
       this.$router.push('/login')
     },
 
     formatDate(date) {
       if (!date) {
-        return 'Sin fecha'
+        return this.ui.noDate
       }
 
-      return new Date(date).toLocaleDateString('es-ES', {
+      const locales = {
+        es: 'es-ES',
+        en: 'en-US',
+        fr: 'fr-FR',
+      }
+
+      return new Date(date).toLocaleDateString(locales[this.$i18n.locale] || 'es-ES', {
         day: '2-digit',
         month: 'short',
         year: 'numeric',

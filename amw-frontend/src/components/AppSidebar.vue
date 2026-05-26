@@ -2,7 +2,7 @@
   <aside
       class="fixed left-0 top-0 h-full bg-[#FAF9F6] dark:bg-stone-950 z-50 border-r border-stone-200/40 transition-all duration-300 ease-in-out overflow-hidden"
       :class="isExpanded ? 'w-72 px-6' : 'w-20 px-3'"
-      aria-label="Navegación lateral principal"
+      :aria-label="$t('accessibility.sideNavigation')"
       @mouseenter="isExpanded = true"
       @mouseleave="isExpanded = false"
       @focusin="isExpanded = true"
@@ -11,13 +11,15 @@
     <div class="h-full flex flex-col py-7">
       <!-- Usuario -->
       <div class="mb-12">
-        <div
+        <router-link
+            to="/profile"
             class="flex items-center mb-2"
             :class="isExpanded ? 'gap-3 px-1' : 'justify-center'"
+            :aria-label="$t('accessibility.goTo', { page: $t('nav.profile') })"
         >
           <img
-              :alt="`Foto de perfil de ${userName}`"
-              class="w-10 h-10 object-cover shrink-0"
+              :alt="$t('accessibility.profilePhoto', { name: userName })"
+              class="w-10 h-10 rounded-full object-cover shrink-0"
               :src="userProfileImage"
           />
 
@@ -33,49 +35,57 @@
               AMW
             </p>
           </div>
-        </div>
+        </router-link>
       </div>
 
       <!-- Navegación principal -->
-      <nav class="flex-1 flex flex-col gap-2">
+      <nav class="flex-1 flex flex-col gap-2" :aria-label="$t('accessibility.sideNavigation')">
         <router-link
             :class="sideLinkClass('/feed')"
             to="/feed"
-            aria-label="Ir al feed"
-            :title="!isExpanded ? 'Feed' : null"
+            :aria-label="$t('accessibility.goTo', { page: $t('nav.feed') })"
+            :title="!isExpanded ? $t('nav.feed') : null"
         >
-          <span class="material-symbols-outlined shrink-0" aria-hidden="true">palette</span>
-          <span v-if="isExpanded">Feed</span>
+          <span class="material-symbols-outlined shrink-0" aria-hidden="true">
+            palette
+          </span>
+          <span v-if="isExpanded">{{ $t('nav.feed') }}</span>
         </router-link>
 
         <router-link
             :class="sideLinkClass('/profile')"
             to="/profile"
-            aria-label="Ir al perfil"
-            :title="!isExpanded ? 'Portfolio' : null"
+            :aria-label="$t('accessibility.goTo', { page: $t('nav.profile') })"
+            :title="!isExpanded ? $t('nav.profile') : null"
         >
-          <span class="material-symbols-outlined shrink-0" aria-hidden="true">brush</span>
-          <span v-if="isExpanded">Portfolio</span>
+          <span class="material-symbols-outlined shrink-0" aria-hidden="true">
+            brush
+          </span>
+          <span v-if="isExpanded">{{ $t('nav.profile') }}</span>
         </router-link>
 
         <router-link
             :class="sideLinkClass('/collections')"
             to="/collections"
-            aria-label="Ir a colecciones"
-            :title="!isExpanded ? 'Colecciones' : null"
+            :aria-label="$t('accessibility.goTo', { page: $t('nav.collections') })"
+            :title="!isExpanded ? $t('nav.collections') : null"
         >
-          <span class="material-symbols-outlined shrink-0" aria-hidden="true">gallery_thumbnail</span>
-          <span v-if="isExpanded">Colecciones</span>
+          <span class="material-symbols-outlined shrink-0" aria-hidden="true">
+            gallery_thumbnail
+          </span>
+          <span v-if="isExpanded">{{ $t('nav.collections') }}</span>
         </router-link>
 
         <router-link
             :class="sideLinkClass('/messages')"
             to="/messages"
-            aria-label="Ir a mensajes"
-            :title="!isExpanded ? 'Mensajes' : null"
+            :aria-label="$t('accessibility.goTo', { page: $t('nav.messages') })"
+            :title="!isExpanded ? $t('nav.messages') : null"
         >
-          <span class="material-symbols-outlined shrink-0" aria-hidden="true">forum</span>
-          <span v-if="isExpanded">Mensajes</span>
+          <span class="material-symbols-outlined shrink-0" aria-hidden="true">
+            forum
+          </span>
+          <span v-if="isExpanded">{{ $t('nav.messages') }}</span>
         </router-link>
       </nav>
 
@@ -85,8 +95,9 @@
             class="sidebar-upload-button"
             :class="isExpanded ? 'sidebar-upload-expanded' : 'sidebar-upload-collapsed'"
             type="button"
+            :aria-label="$t('nav.uploadArtwork')"
             @click="showCreatePostModal = true"
-            :title="!isExpanded ? 'Subir obra' : null"
+            :title="!isExpanded ? $t('nav.uploadArtwork') : null"
         >
           <span
               v-if="!isExpanded"
@@ -97,7 +108,7 @@
           </span>
 
           <span v-else class="whitespace-nowrap">
-            Subir obra
+            {{ $t('nav.uploadArtwork') }}
           </span>
         </button>
 
@@ -105,26 +116,31 @@
           <router-link
               :class="bottomLinkClass('/help')"
               to="/help"
-              aria-label="Ir a soporte"
-              :title="!isExpanded ? 'Soporte' : null"
+              :aria-label="$t('accessibility.goTo', { page: $t('nav.support') })"
+              :title="!isExpanded ? $t('nav.support') : null"
           >
-            <span class="material-symbols-outlined text-sm shrink-0" aria-hidden="true">support_agent</span>
-            <span v-if="isExpanded">Soporte</span>
+            <span class="material-symbols-outlined text-sm shrink-0" aria-hidden="true">
+              support_agent
+            </span>
+            <span v-if="isExpanded">{{ $t('nav.support') }}</span>
           </router-link>
 
           <router-link
               :class="bottomLinkClass('/terms')"
               to="/terms"
-              aria-label="Ir a términos y condiciones"
-              :title="!isExpanded ? 'Términos' : null"
+              :aria-label="$t('accessibility.goTo', { page: $t('nav.terms') })"
+              :title="!isExpanded ? $t('nav.terms') : null"
           >
-            <span class="material-symbols-outlined text-sm shrink-0" aria-hidden="true">info</span>
-            <span v-if="isExpanded">Términos</span>
+            <span class="material-symbols-outlined text-sm shrink-0" aria-hidden="true">
+              info
+            </span>
+            <span v-if="isExpanded">{{ $t('nav.terms') }}</span>
           </router-link>
         </div>
       </div>
     </div>
   </aside>
+
   <CreatePostModal
       v-model="showCreatePostModal"
       @created="handlePostCreated"
@@ -156,7 +172,6 @@ export default {
   },
 
   methods: {
-
     handlePostCreated(post) {
       window.dispatchEvent(new CustomEvent('amw-post-created', { detail: post }))
     },
@@ -255,6 +270,14 @@ export default {
 </script>
 
 <style scoped>
+.font-notoSerif {
+  font-family: 'Noto Serif', serif;
+}
+
+.font-manrope {
+  font-family: 'Manrope', sans-serif;
+}
+
 .sidebar-upload-button {
   height: 44px;
   min-height: 44px;

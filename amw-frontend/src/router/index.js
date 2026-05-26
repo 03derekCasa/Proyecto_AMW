@@ -9,6 +9,7 @@ import FeedPage from '../views/FeedPage.vue'
 import CollectionsPage from '../views/CollectionsPage.vue'
 import MessagesPage from '../views/MessagesPage.vue'
 import PublicProfilePage from '../views/PublicProfilePage.vue'
+import PostDetailPage from '../views/PostDetailPage.vue'
 
 const routes = [
     {
@@ -42,6 +43,14 @@ const routes = [
         path: '/feed',
         name: 'Feed',
         component: FeedPage,
+        meta: {
+            requiresAuth: true,
+        },
+    },
+    {
+        path: '/posts/:id',
+        name: 'PostDetail',
+        component: PostDetailPage,
         meta: {
             requiresAuth: true,
         },

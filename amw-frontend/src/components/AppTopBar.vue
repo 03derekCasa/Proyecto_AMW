@@ -1,56 +1,67 @@
 <template>
   <nav
-      class="fixed top-0 left-20 right-0 z-40 flex justify-between items-center px-12 py-5 bg-[#FAF9F6]/70 dark:bg-stone-950/70 backdrop-blur-xl"
-      aria-label="Navegación superior"
+      class="fixed top-0 left-20 right-0 z-40 flex justify-between items-center gap-4 px-4 sm:px-8 lg:px-12 py-5 bg-[#FAF9F6]/70 dark:bg-stone-950/70 backdrop-blur-xl"
+      :aria-label="$t('accessibility.topNavigation')"
   >
     <!-- Zona izquierda -->
     <div class="flex items-center gap-8">
-      <div class="hidden md:flex gap-6">
-      </div>
+      <router-link
+          to="/feed"
+          class="font-notoSerif italic text-xl text-stone-900 dark:text-stone-50 hover:text-primary transition-colors"
+          aria-label="Art Makes A Way"
+      >
+        AMW
+      </router-link>
     </div>
 
     <!-- Zona derecha -->
-    <div class="flex items-center gap-6">
+    <div class="flex items-center gap-3 sm:gap-6">
+      <!-- Selector global de idioma -->
+      <div class="relative">
+        <label for="language-selector" class="sr-only">
+          {{ $t('common.language') }}
+        </label>
+
+        <select
+            id="language-selector"
+            v-model="$i18n.locale"
+            class="bg-transparent border-0 focus:ring-0 font-manrope text-[10px] uppercase tracking-widest text-primary font-bold cursor-pointer px-1 py-2"
+            :aria-label="$t('accessibility.chooseLanguage')"
+            @change="saveLocale"
+        >
+          <option value="es">ES</option>
+          <option value="en">EN</option>
+          <option value="fr">FR</option>
+        </select>
+      </div>
+
       <button
           type="button"
-          aria-label="Ver notificaciones"
-          class="text-on-surface cursor-pointer hover:opacity-70 transition-opacity"
+          :aria-label="$t('common.notifications')"
+          class="hidden sm:block text-on-surface cursor-pointer hover:opacity-70 transition-opacity"
       >
         <span class="material-symbols-outlined" aria-hidden="true">
           notifications
         </span>
       </button>
 
-      <!-- Solo sale en ProfilePage -->
+      <!-- Solo aparece en ProfilePage -->
       <button
           v-if="showEditButton"
-          class="font-manrope text-[10px] uppercase tracking-widest text-primary font-bold hover:opacity-70 transition-opacity"
+          class="hidden md:block font-manrope text-[10px] uppercase tracking-widest text-primary font-bold hover:opacity-70 transition-opacity"
           type="button"
           @click="$emit('toggle-edit')"
       >
-        {{ isEditing ? 'Cerrar edición' : 'Editar perfil' }}
+        {{ isEditing ? $t('nav.closeEdit') : $t('nav.editProfile') }}
       </button>
-
-      <!-- Foto del usuario actual -->
-      <router-link
-          to="/profile"
-          class="w-10 h-10 rounded-full overflow-hidden bg-stone-200 border border-stone-200 hover:ring-2 hover:ring-primary transition-all"
-          aria-label="Ir a mi perfil"
-      >
-        <img
-            :src="currentUserImage"
-            :alt="`Foto de perfil de ${currentUserName}`"
-            class="w-full h-full object-cover"
-        />
-      </router-link>
 
       <button
           v-if="showLogoutButton"
-          class="font-manrope text-[10px] uppercase tracking-widest text-stone-500 hover:text-primary transition-colors"
+          class="hidden lg:block font-manrope text-[10px] uppercase tracking-widest text-stone-500 hover:text-primary transition-colors"
           type="button"
           @click="$emit('logout')"
       >
-        Cerrar sesión
+        {{ $t('nav.logout') }}
       </button>
     </div>
   </nav>
@@ -61,6 +72,8 @@ import api from '@/services/api'
 
 export default {
   name: 'AppTopBar',
+
+  emits: ['toggle-edit', 'logout'],
 
   props: {
     showEditButton: {
@@ -87,10 +100,16 @@ export default {
   },
 
   mounted() {
+    document.documentElement.lang = this.$i18n.locale
     this.loadCurrentUser()
   },
 
   methods: {
+    saveLocale() {
+      localStorage.setItem('amw_locale', this.$i18n.locale)
+      document.documentElement.lang = this.$i18n.locale
+    },
+
     async loadCurrentUser() {
       this.loadUserFromLocalStorage()
 
@@ -149,25 +168,27 @@ export default {
 </script>
 
 <style scoped>
-.topbar-link {
-  font-family: Manrope, sans-serif;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: #78716c;
-  transition: color 0.2s ease;
+.font-notoSerif {
+  font-family: 'Noto Serif', serif;
 }
 
-.topbar-link:hover {
-  color: #a900a9;
-}
-
-.router-link-active.topbar-link {
-  color: #a900a9;
-  font-weight: 700;
+.font-manrope {
+  font-family: 'Manrope', sans-serif;
 }
 
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
 }
 </style>

@@ -11,7 +11,7 @@ class UploadController extends Controller
     public function image(Request $request)
     {
         $validated = $request->validate([
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
 
         $path = $validated['image']->store('posts', 'public');

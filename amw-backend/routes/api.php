@@ -25,7 +25,6 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
 Route::get('/posts', [PostController::class, 'index']);
-Route::get('/posts/{id}', [PostController::class, 'show']);
 
 Route::get('/posts/{id}/comments', [CommentController::class, 'index']);
 
@@ -59,6 +58,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-posts', [PostController::class, 'myPosts']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+    Route::get('/posts/{id}', [PostController::class, 'show']);
+
     /* Rutas Likes */
     Route::post('/posts/{id}/like', [LikeController::class, 'store']);
     Route::delete('/posts/{id}/like', [LikeController::class, 'destroy']);

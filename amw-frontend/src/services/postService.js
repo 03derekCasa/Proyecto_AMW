@@ -58,6 +58,32 @@ export async function getMyPosts() {
     }
 }
 
+function normalizeCommentList(payload) {
+    if (Array.isArray(payload?.data?.data)) {
+        return payload.data.data
+    }
+
+    if (Array.isArray(payload?.data)) {
+        return payload.data
+    }
+
+    if (Array.isArray(payload)) {
+        return payload
+    }
+
+    return []
+}
+
+export async function getComments(postId) {
+    const response = await api.get(`/posts/${postId}/comments`)
+    const payload = response.data
+
+    return {
+        comments: normalizeCommentList(payload),
+        raw: payload,
+    }
+}
+
 export async function uploadPostImage(file) {
     const formData = new FormData()
     formData.append('image', file)
@@ -127,9 +153,9 @@ export async function getMyLikes() {
     }
 }
 
-export async function createComment(postId, body) {
+export async function createComment(postId, content) {
     const response = await api.post(`/posts/${postId}/comments`, {
-        body,
+        content,
     })
 
     return response.data?.data || response.data?.comment || response.data

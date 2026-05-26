@@ -1,28 +1,25 @@
 <template>
   <div
       v-if="modelValue"
-      class="fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center px-6"
+      class="fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4 sm:px-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="create-post-title"
       @click.self="closeModal"
   >
-    <!-- Botón cerrar -->
     <button
         type="button"
-        class="fixed top-6 right-8 text-white hover:opacity-70 transition-opacity text-4xl leading-none"
-        aria-label="Cerrar creación de post"
+        class="fixed top-5 right-6 sm:top-6 sm:right-8 text-white hover:opacity-70 transition-opacity text-4xl leading-none"
+        :aria-label="$t('postModal.close')"
         @click="closeModal"
     >
       ×
     </button>
 
-    <!-- Ventana modal -->
     <section
         class="w-[min(900px,92vw)] max-h-[82vh] bg-[#FAF9F6] rounded-2xl overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr]"
     >
-      <!-- Columna izquierda: imagen -->
-      <div class="bg-stone-100 h-[460px] lg:h-[500px] flex items-center justify-center relative overflow-hidden">
+      <div class="bg-stone-100 h-[300px] lg:h-[500px] flex items-center justify-center relative overflow-hidden">
         <label
             for="post-image"
             class="w-full h-full flex items-center justify-center cursor-pointer group"
@@ -39,23 +36,31 @@
           <img
               v-if="previewUrl"
               :src="previewUrl"
-              :alt="form.alt_text || 'Vista previa de la imagen seleccionada'"
+              :alt="form.alt_text || $t('postModal.imagePreview')"
               class="w-full h-full object-contain bg-black"
           />
 
-          <div v-else class="h-full w-full flex flex-col items-center justify-center text-center px-8">
-            <div class="w-16 h-16 mx-auto rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <span class="material-symbols-outlined text-3xl text-primary" aria-hidden="true">
+          <div
+              v-else
+              class="h-full w-full flex flex-col items-center justify-center text-center px-8"
+          >
+            <div
+                class="w-16 h-16 mx-auto rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform"
+            >
+              <span
+                  class="material-symbols-outlined text-3xl text-primary"
+                  aria-hidden="true"
+              >
                 add_photo_alternate
               </span>
             </div>
 
             <p class="font-manrope text-xs font-bold uppercase tracking-widest mt-5 text-stone-800">
-              Seleccionar imagen
+              {{ $t('postModal.selectImage') }}
             </p>
 
             <p class="font-manrope text-[11px] text-stone-500 mt-2">
-              JPG, PNG o WEBP. Máximo recomendado: 4 MB.
+              {{ $t('postModal.imageHelp') }}
             </p>
           </div>
         </label>
@@ -66,15 +71,14 @@
             class="absolute bottom-5 left-1/2 -translate-x-1/2 bg-white/90 text-stone-900 px-4 py-2 rounded-full text-xs font-bold hover:bg-primary hover:text-white transition-colors"
             @click="openFilePicker"
         >
-          Cambiar imagen
+          {{ $t('postModal.changeImage') }}
         </button>
       </div>
 
-      <!-- Columna derecha: datos -->
       <form class="flex flex-col h-[460px] lg:h-[500px]" @submit.prevent="submitPost">
         <header class="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
           <h1 id="create-post-title" class="font-manrope text-lg font-extrabold tracking-tight">
-            Crear nuevo post
+            {{ $t('postModal.create') }}
           </h1>
 
           <button
@@ -82,47 +86,47 @@
               class="font-manrope text-sm font-bold text-primary hover:opacity-70 transition-opacity disabled:opacity-40"
               :disabled="loading"
           >
-            {{ loading ? 'Subiendo...' : 'Compartir' }}
+            {{ loading ? $t('postModal.uploading') : $t('postModal.share') }}
           </button>
         </header>
 
-        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-          <!-- Título -->
+        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4 custom-scrollbar">
           <div>
             <label
                 for="post-title"
                 class="block font-manrope text-[10px] uppercase tracking-widest text-stone-500 mb-2"
             >
-              Título de la obra
+              {{ $t('postModal.title') }}
             </label>
 
             <input
                 id="post-title"
+                name="title"
                 v-model.trim="form.title"
                 type="text"
                 maxlength="120"
                 class="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-0 focus:border-primary"
-                placeholder="Ej. Fragmentos de luz"
+                :placeholder="$t('postModal.titlePlaceholder')"
                 required
             />
           </div>
 
-          <!-- Caption / descripción -->
           <div>
             <label
                 for="post-caption"
                 class="block font-manrope text-[10px] uppercase tracking-widest text-stone-500 mb-2"
             >
-              Caption / descripción
+              {{ $t('postModal.caption') }}
             </label>
 
             <textarea
                 id="post-caption"
+                name="description"
                 v-model="form.caption"
                 rows="4"
                 maxlength="2200"
                 class="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm resize-none focus:ring-0 focus:border-primary"
-                placeholder="Explica la inspiración, el proceso creativo, la técnica utilizada o el contexto artístico de la obra..."
+                :placeholder="$t('postModal.captionPlaceholder')"
             ></textarea>
 
             <p class="text-right text-[10px] text-stone-400 mt-1">
@@ -130,45 +134,45 @@
             </p>
           </div>
 
-          <!-- Texto alternativo -->
           <div>
             <label
                 for="post-alt-text"
                 class="block font-manrope text-[10px] uppercase tracking-widest text-stone-500 mb-2"
             >
-              Texto alternativo de la imagen
+              {{ $t('postModal.altText') }}
             </label>
 
             <input
                 id="post-alt-text"
+                name="alt_text"
                 v-model.trim="form.alt_text"
                 type="text"
                 maxlength="180"
                 class="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-0 focus:border-primary"
-                placeholder="Describe brevemente lo que aparece en la imagen"
+                :placeholder="$t('postModal.altPlaceholder')"
             />
 
             <p class="text-[10px] text-stone-400 mt-2">
-              Recomendado para accesibilidad. Más adelante se puede guardar en backend.
+              {{ $t('postModal.altHelp') }}
             </p>
           </div>
 
-          <!-- Hashtags -->
           <div>
             <label
                 for="post-hashtag"
                 class="block font-manrope text-[10px] uppercase tracking-widest text-stone-500 mb-2"
             >
-              Hashtags / etiquetas
+              {{ $t('postModal.hashtags') }}
             </label>
 
             <div class="flex gap-2">
               <input
                   id="post-hashtag"
+                  name="hashtag"
                   v-model="tagInput"
                   type="text"
                   class="flex-1 bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-0 focus:border-primary"
-                  placeholder="Ej. pintura, abstracto, zaragoza"
+                  :placeholder="$t('postModal.hashtagPlaceholder')"
                   @keydown.enter.prevent="addTag"
               />
 
@@ -177,7 +181,7 @@
                   class="px-4 rounded-xl bg-stone-900 text-white font-manrope text-xs font-bold hover:bg-primary transition-colors"
                   @click="addTag"
               >
-                Añadir
+                {{ $t('postModal.add') }}
               </button>
             </div>
 
@@ -187,6 +191,7 @@
                   :key="tag"
                   type="button"
                   class="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold hover:bg-primary hover:text-white transition-colors"
+                  :aria-label="`${$t('common.close')} #${tag}`"
                   @click="removeTag(tag)"
               >
                 #{{ tag }}
@@ -194,28 +199,28 @@
             </div>
 
             <p class="text-[10px] text-stone-400 mt-2">
-              Pulsa Enter o “Añadir”. Máximo 10 etiquetas.
+              {{ $t('postModal.hashtagHelp') }}
             </p>
           </div>
 
-          <!-- Tipo y categoría -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label
                   for="post-type"
                   class="block font-manrope text-[10px] uppercase tracking-widest text-stone-500 mb-2"
               >
-                Tipo
+                {{ $t('postModal.type') }}
               </label>
 
               <select
                   id="post-type"
+                  name="type"
                   v-model="form.type"
                   class="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-0 focus:border-primary"
               >
-                <option value="obra">Obra</option>
-                <option value="evento">Evento</option>
-                <option value="producto">Producto</option>
+                <option value="obra">{{ $t('postModal.artwork') }}</option>
+                <option value="evento">{{ $t('postModal.event') }}</option>
+                <option value="producto">{{ $t('postModal.product') }}</option>
               </select>
             </div>
 
@@ -224,15 +229,16 @@
                   for="post-category"
                   class="block font-manrope text-[10px] uppercase tracking-widest text-stone-500 mb-2"
               >
-                Categoría
+                {{ $t('postModal.category') }}
               </label>
 
               <select
                   id="post-category"
+                  name="category_id"
                   v-model="form.category_id"
                   class="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-0 focus:border-primary"
               >
-                <option :value="null">Sin categoría</option>
+                <option :value="null">{{ $t('postModal.noCategory') }}</option>
 
                 <option
                     v-for="category in categories"
@@ -245,23 +251,23 @@
             </div>
           </div>
 
-          <!-- Técnica y año -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label
                   for="post-technique"
                   class="block font-manrope text-[10px] uppercase tracking-widest text-stone-500 mb-2"
               >
-                Técnica artística
+                {{ $t('postModal.technique') }}
               </label>
 
               <input
                   id="post-technique"
+                  name="technique"
                   v-model.trim="form.technique"
                   type="text"
                   maxlength="80"
                   class="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-0 focus:border-primary"
-                  placeholder="Ej. óleo, digital, fotografía..."
+                  :placeholder="$t('postModal.techniquePlaceholder')"
               />
             </div>
 
@@ -270,30 +276,33 @@
                   for="post-year"
                   class="block font-manrope text-[10px] uppercase tracking-widest text-stone-500 mb-2"
               >
-                Año de creación
+                {{ $t('postModal.year') }}
               </label>
 
               <input
                   id="post-year"
+                  name="creation_year"
                   v-model="form.creation_year"
                   type="number"
                   min="1900"
                   :max="currentYear"
                   class="w-full bg-white border border-stone-200 rounded-xl px-4 py-3 text-sm focus:ring-0 focus:border-primary"
-                  placeholder="Ej. 2026"
+                  :placeholder="$t('postModal.yearPlaceholder')"
               />
             </div>
           </div>
 
-          <!-- Publicar -->
-          <div class="flex items-center justify-between p-4 bg-white rounded-xl border border-stone-200">
+          <label
+              for="post-is-published"
+              class="flex items-center justify-between gap-4 p-4 bg-white rounded-xl border border-stone-200 cursor-pointer"
+          >
             <div>
               <p class="font-manrope text-sm font-bold">
-                Publicar ahora
+                {{ $t('postModal.publishNow') }}
               </p>
 
               <p class="font-manrope text-xs text-stone-500">
-                Si está activo, el post aparecerá publicado en AMW.
+                {{ $t('postModal.publishHelp') }}
               </p>
             </div>
 
@@ -302,10 +311,9 @@
                 name="is_published"
                 v-model="form.is_published"
                 type="checkbox"
-                class="rounded border-stone-300 text-primary focus:ring-primary"
-                aria-label="Publicar ahora"
+                class="rounded border-stone-300 text-primary focus:ring-primary shrink-0"
             />
-          </div>
+          </label>
 
           <p
               v-if="errorMessage"
@@ -439,12 +447,12 @@ export default {
       }
 
       if (!file.type.startsWith('image/')) {
-        this.errorMessage = 'El archivo seleccionado debe ser una imagen.'
+        this.errorMessage = this.$t('postModal.errors.invalidImage')
         return
       }
 
       if (file.size > 4 * 1024 * 1024) {
-        this.errorMessage = 'La imagen no debería superar los 4 MB.'
+        this.errorMessage = this.$t('postModal.errors.maximumSize')
         return
       }
 
@@ -472,7 +480,7 @@ export default {
       }
 
       if (this.form.hashtags.length >= 10) {
-        this.errorMessage = 'Puedes añadir como máximo 10 hashtags.'
+        this.errorMessage = this.$t('postModal.errors.maximumTags')
         return
       }
 
@@ -497,12 +505,12 @@ export default {
       this.errorMessage = ''
 
       if (!this.selectedFile) {
-        this.errorMessage = 'Selecciona una imagen antes de publicar.'
+        this.errorMessage = this.$t('postModal.errors.selectImage')
         return
       }
 
       if (!this.form.title.trim()) {
-        this.errorMessage = 'El título es obligatorio.'
+        this.errorMessage = this.$t('postModal.errors.requiredTitle')
         return
       }
 
@@ -510,7 +518,7 @@ export default {
           this.form.creation_year &&
           Number(this.form.creation_year) > this.currentYear
       ) {
-        this.errorMessage = 'El año de creación no puede ser posterior al año actual.'
+        this.errorMessage = this.$t('postModal.errors.invalidYear')
         return
       }
 
@@ -531,17 +539,16 @@ export default {
 
         const post = await createPost(postPayload)
 
+        /*
+         * El evento global se lanza en AppSidebar.vue mediante @created.
+         * No se dispara aquí para evitar recargar el Feed dos veces.
+         */
         this.$emit('created', post)
-        window.dispatchEvent(new CustomEvent('amw-post-created', { detail: post }))
 
         this.resetForm()
         this.$emit('update:modelValue', false)
       } catch (error) {
-        if (error.response?.data?.message) {
-          this.errorMessage = error.response.data.message
-        } else {
-          this.errorMessage = 'No se pudo crear el post.'
-        }
+        this.errorMessage = this.$t('postModal.errors.create')
       } finally {
         this.loading = false
       }
@@ -555,15 +562,15 @@ export default {
       }
 
       if (this.form.technique.trim()) {
-        parts.push(`Técnica: ${this.form.technique.trim()}`)
+        parts.push(`${this.$t('postModal.savedTechnique')}: ${this.form.technique.trim()}`)
       }
 
       if (this.form.creation_year) {
-        parts.push(`Año de creación: ${this.form.creation_year}`)
+        parts.push(`${this.$t('postModal.savedYear')}: ${this.form.creation_year}`)
       }
 
       if (this.form.alt_text.trim()) {
-        parts.push(`Texto alternativo: ${this.form.alt_text.trim()}`)
+        parts.push(`${this.$t('postModal.savedAltText')}: ${this.form.alt_text.trim()}`)
       }
 
       if (this.form.hashtags.length > 0) {
@@ -579,6 +586,19 @@ export default {
 <style scoped>
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e3e2e0;
+  border-radius: 10px;
 }
 
 .sr-only {
