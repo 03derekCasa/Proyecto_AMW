@@ -23,8 +23,7 @@ class MessageResource extends JsonResource
             'sender' => $this->whenLoaded('sender', function () {
                 return [
                     'id' => $this->sender->id,
-                    'name' => $this->sender->name,
-                    'avatar' => $this->sender->avatar ?? null,
+                    'username' => $this->sender->username,
                     'profile' => [
                         'artistic_name' => $this->sender->profile?->artistic_name,
                         'profile_image_url' => $this->sender->profile?->profile_image_url,

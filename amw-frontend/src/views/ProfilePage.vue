@@ -17,20 +17,20 @@
     <main class="ml-20 pt-32 min-h-screen">
       <!-- Header -->
       <header class="relative px-12 mb-32">
-        <div class="w-full h-[512px] bg-surface-container-low relative overflow-hidden">
+        <div class="w-full h-[512px] bg-surface-container-low relative overflow-hidden rounded-3xl">
           <img
-              class="w-full h-full object-cover grayscale opacity-70 mix-blend-multiply"
+              class="w-full h-full object-cover rounded-3xl grayscale opacity-70 mix-blend-multiply"
               :src="displayCoverImage"
               :alt="ui.headerImage"
           />
-          <div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface/80"></div>
+          <div class="absolute inset-0 rounded-3xl bg-gradient-to-b from-transparent to-surface/80"></div>
         </div>
 
         <div class="absolute bottom-[-80px] left-24 flex items-end gap-12">
           <div class="relative">
-            <div class="w-48 h-64 bg-stone-200 overflow-hidden border-8 border-surface shadow-2xl">
+            <div class="w-48 h-64 bg-stone-200 overflow-hidden rounded-2xl border-8 border-surface shadow-2xl">
               <img
-                  class="w-full h-full object-cover"
+                  class="w-full h-full object-cover rounded-xl"
                   :src="displayProfileImage"
                   :alt="ui.profileImage"
               />
@@ -41,6 +41,10 @@
             <h2 class="font-notoSerif text-6xl italic text-on-surface mb-2 tracking-tight">
               {{ userName }}
             </h2>
+
+            <p class="font-manrope text-sm text-primary font-medium mb-2">
+              {{ formattedUsername }}
+            </p>
 
             <p class="font-manrope text-sm text-stone-500 uppercase tracking-widest">
               {{ profile.specialty || ui.artist }}
@@ -82,14 +86,14 @@
       <section v-if="successMessage || errorMessage" class="px-24 mb-8">
         <p
             v-if="successMessage"
-            class="text-green-700 bg-green-50 border border-green-200 px-4 py-3 font-manrope text-sm"
+            class="text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3 font-manrope text-sm"
         >
           {{ successMessage }}
         </p>
 
         <p
             v-if="errorMessage"
-            class="text-red-700 bg-red-50 border border-red-200 px-4 py-3 font-manrope text-sm"
+            class="text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3 font-manrope text-sm"
         >
           {{ errorMessage }}
         </p>
@@ -97,7 +101,7 @@
 
       <!-- Hidden edit form -->
       <section v-if="isEditing" class="px-24 mb-32">
-        <div class="bg-surface-container-low p-10 border border-outline-variant/30 shadow-xl">
+        <div class="bg-surface-container-low p-10 border border-outline-variant/30 rounded-2xl shadow-xl">
           <div class="flex justify-between items-start mb-10">
             <div>
               <p class="font-manrope text-[10px] uppercase tracking-[0.3em] text-primary mb-3">
@@ -110,7 +114,7 @@
             </div>
 
             <button
-                class="font-manrope text-[10px] uppercase tracking-widest text-stone-500 hover:text-primary transition-colors"
+                class="px-4 py-2 rounded-full font-manrope text-[10px] uppercase tracking-widest text-stone-500 hover:text-primary hover:bg-surface transition-colors"
                 type="button"
                 @click="toggleEditForm"
             >
@@ -201,9 +205,9 @@
                   {{ ui.coverImageLabel }}
                 </label>
 
-                <div class="mb-3 overflow-hidden border border-outline-variant/30 bg-surface">
+                <div class="mb-3 overflow-hidden rounded-xl border border-outline-variant/30 bg-surface">
                   <img
-                      class="w-full h-28 object-cover"
+                      class="w-full h-28 object-cover rounded-xl"
                       :src="displayCoverImage"
                       :alt="ui.headerImage"
                   />
@@ -307,7 +311,7 @@
 
             <div class="lg:col-span-2 flex justify-end gap-4 pt-6 border-t border-outline-variant/30">
               <button
-                  class="px-10 py-4 border border-outline-variant text-on-surface font-manrope font-bold uppercase tracking-widest text-xs hover:bg-surface transition-all"
+                  class="px-10 py-4 rounded-full border border-outline-variant text-on-surface font-manrope font-bold uppercase tracking-widest text-xs hover:bg-surface transition-all"
                   type="button"
                   @click="toggleEditForm"
               >
@@ -315,7 +319,7 @@
               </button>
 
               <button
-                  class="px-12 py-4 bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform disabled:opacity-60"
+                  class="px-12 py-4 rounded-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform disabled:opacity-60"
                   type="submit"
                   :disabled="loading"
               >
@@ -340,13 +344,13 @@
           <div class="mt-12 space-y-8">
             <router-link
                 to="/messages"
-                class="block w-full text-center py-4 px-12 bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10"
+                class="block w-full text-center py-4 px-12 rounded-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10"
             >
               {{ ui.messages }}
             </router-link>
 
             <button
-                class="w-full py-4 px-12 border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
+                class="w-full py-4 px-12 rounded-full border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
                 type="button"
                 @click="toggleEditForm"
             >
@@ -360,7 +364,7 @@
                   target="_blank"
                   rel="noopener noreferrer"
                   :aria-label="ui.website"
-                  class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
+                  class="material-symbols-outlined p-2 rounded-full border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
               >
                 language
               </a>
@@ -371,7 +375,7 @@
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
-                  class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
+                  class="material-symbols-outlined p-2 rounded-full border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
               >
                 share
               </a>
@@ -389,7 +393,7 @@
             {{ ui.loadingProfile }}
           </div>
 
-          <div v-else-if="artworks.length === 0" class="bg-surface-container-low p-12 border border-outline-variant/20">
+          <div v-else-if="artworks.length === 0" class="bg-surface-container-low p-12 border border-outline-variant/20 rounded-2xl">
             <p class="font-notoSerif text-2xl italic mb-4">
               {{ ui.emptyWorksTitle }}
             </p>
@@ -407,18 +411,18 @@
             >
               <button
                   type="button"
-                  class="block w-full bg-surface-container aspect-[3/4] relative overflow-hidden group"
+                  class="block w-full bg-surface-container aspect-[3/4] relative overflow-hidden rounded-2xl group"
                   :aria-label="`${ui.viewArtwork}: ${artwork.title}`"
                   @click="goToPost(artwork.id)"
               >
                 <img
-                    class="w-full h-full object-cover transition-all duration-700 cursor-pointer"
+                    class="w-full h-full object-cover rounded-2xl transition-transform duration-700 cursor-pointer group-hover:scale-105"
                     :src="artwork.image"
                     :alt="artwork.title"
                 />
 
-                <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white px-4 py-2">
+                <div class="absolute inset-0 rounded-2xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white rounded-full px-4 py-2">
                     {{ ui.viewArtwork }}
                   </span>
                 </div>
@@ -439,7 +443,7 @@
           <div class="mt-32 flex justify-center">
             <router-link
                 to="/feed"
-                class="inline-block px-16 py-4 border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
+                class="inline-block px-16 py-4 rounded-full border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
             >
               {{ ui.viewFullPortfolio }}
             </router-link>
@@ -689,6 +693,7 @@ export default {
 
       userProfileImage: 'https://placehold.co/400x500?text=AMW',
       userName: 'Artista AMW',
+      userUsername: '',
       userWorksCount: 0,
       userFollowers: '0',
       userFollowing: 0,
@@ -719,6 +724,14 @@ export default {
 
     displayCoverImage() {
       return this.coverImagePreview || this.profile.cover_image_url || this.fallbackCoverImage
+    },
+
+    formattedUsername() {
+      if (!this.userUsername) {
+        return '@amw'
+      }
+
+      return `@${String(this.userUsername).replace(/^@/, '')}`
     },
   },
 
@@ -763,7 +776,23 @@ export default {
       this.errorMessage = ''
     },
 
+    loadStoredUsername() {
+      const storedUser = localStorage.getItem('amw_user')
+
+      if (!storedUser) {
+        return
+      }
+
+      try {
+        const user = JSON.parse(storedUser)
+        this.userUsername = user?.username || this.userUsername
+      } catch (error) {
+        localStorage.removeItem('amw_user')
+      }
+    },
+
     async loadProfile() {
+      this.loadStoredUsername()
       this.loading = true
       this.errorMessage = ''
 
@@ -781,6 +810,7 @@ export default {
         }
 
         this.userName = data.artistic_name || this.ui.artist
+        this.userUsername = data.username || this.userUsername
         this.userProfileImage = data.profile_image_url || this.userProfileImage
       } catch (error) {
         if (error.response?.status === 401) {

@@ -16,7 +16,7 @@ class CommentResource extends JsonResource
             'author' => $this->whenLoaded('user', function () {
                 return [
                     'id' => $this->user?->id,
-                    'name' => $this->user?->name,
+                    'username' => $this->user?->username,
                     'artistic_name' => $this->user?->profile?->artistic_name,
                     'profile_image_url' => $this->user?->profile?->profile_image_url,
                 ];

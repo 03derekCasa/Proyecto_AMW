@@ -97,7 +97,7 @@
                   </p>
 
                   <p class="font-manrope text-[10px] text-stone-400 truncate">
-                    {{ user.profile?.specialty || user.email }}
+                    {{ getUserUsername(user) }}
                   </p>
                 </div>
               </button>
@@ -153,6 +153,10 @@
                     </span>
                   </div>
 
+                  <p class="font-manrope text-[10px] text-primary truncate mb-1">
+                    {{ getParticipantUsername(conversation) }}
+                  </p>
+
                   <p class="text-sm text-stone-600 truncate font-manrope">
                     {{ conversation.last_message?.body || ui.noMessagesYet }}
                   </p>
@@ -207,6 +211,10 @@
                   <h2 class="text-base font-bold font-manrope group-hover:text-primary transition-colors">
                     {{ getParticipantName(activeConversation) }}
                   </h2>
+
+                  <p class="font-manrope text-xs text-primary">
+                    {{ getParticipantUsername(activeConversation) }}
+                  </p>
                 </div>
               </router-link>
 
@@ -536,9 +544,9 @@ export default {
 
     filteredConversations() {
       return this.conversations.filter((conversation) => {
-        return this.getParticipantName(conversation)
-            .toLowerCase()
-            .includes(this.search.toLowerCase())
+        const text = `${this.getParticipantName(conversation)} ${this.getParticipantUsername(conversation)}`.toLowerCase()
+
+        return text.includes(this.search.toLowerCase())
       })
     },
   },
@@ -760,9 +768,14 @@ export default {
 
       return (
           participant?.profile?.artistic_name ||
-          participant?.name ||
           this.ui.user
       )
+    },
+
+    getParticipantUsername(conversation) {
+      const participant = this.getParticipant(conversation)
+
+      return this.formatUsername(participant?.username)
     },
 
     getParticipantAvatar(conversation) {
@@ -797,14 +810,25 @@ export default {
     getMessageSenderName(message) {
       return (
           message.sender?.profile?.artistic_name ||
-          message.sender?.name ||
           this.getParticipantName(this.activeConversation) ||
           this.ui.user
       )
     },
 
     getUserName(user) {
-      return user.profile?.artistic_name || user.name || this.ui.user
+      return user.profile?.artistic_name || this.ui.user
+    },
+
+    getUserUsername(user) {
+      return this.formatUsername(user.username)
+    },
+
+    formatUsername(username) {
+      if (!username) {
+        return '@amw'
+      }
+
+      return `@${String(username).replace(/^@/, '')}`
     },
 
     getUserAvatar(user) {

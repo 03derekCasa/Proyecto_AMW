@@ -99,22 +99,22 @@
 
       <div
           v-else
-          class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 masonry-grid"
+          class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4 masonry-grid"
       >
         <article
             v-for="post in filteredPosts"
             :key="post.id"
-            class="masonry-item relative group overflow-hidden rounded-lg bg-gray-200 mb-6"
+            class="masonry-item relative group overflow-hidden rounded-2xl bg-gray-200 mb-4"
         >
           <img
-              class="w-full h-auto object-cover transition-all duration-700"
+              class="w-full h-auto object-cover rounded-2xl transition-all duration-700"
               :src="post.image_url || fallbackImage"
               :alt="$t('feed.postImageAlt', { title: post.title })"
               loading="lazy"
           />
 
           <div
-              class="gallery-overlay absolute inset-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 flex flex-col justify-between p-4 transition-opacity duration-300"
+              class="gallery-overlay absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 flex flex-col justify-between p-4 transition-opacity duration-300"
           >
             <div class="flex justify-end gap-2">
               <button
@@ -328,12 +328,19 @@ export default {
 
 <style scoped>
 .masonry-grid {
-  column-gap: 1.5rem;
+  column-gap: 1rem;
 }
 
 .masonry-item {
   break-inside: avoid;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.masonry-item img,
+.gallery-overlay {
+  border-radius: inherit;
 }
 
 .gallery-overlay {

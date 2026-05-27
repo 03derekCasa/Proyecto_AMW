@@ -85,4 +85,14 @@ Route::middleware('auth:sanctum')->group(function () {
         ->whereNumber('conversation');
 
     Route::get('/users', [UserController::class, 'index']);
+
+    /* Rutas Seguidores */
+    Route::post('/users/{user}/follow', [FollowController::class, 'store']);
+    Route::delete('/users/{user}/follow', [FollowController::class, 'destroy']);
+
+    /* Rutas Notificaciones */
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 });

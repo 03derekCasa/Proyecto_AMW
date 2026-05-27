@@ -11,16 +11,16 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->query('search');
+        $search = trim((string) $request->query('search', ''));
+        $cleanSearch = ltrim(strtolower($search), '@');
 
         $users = User::query()
             ->with('profile')
             ->where('id', '!=', $request->user()->id)
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($subQuery) use ($search) {
+            ->when($search !== '', function ($query) use ($search, $cleanSearch) {
+                $query->where(function ($subQuery) use ($search, $cleanSearch) {
                     $subQuery
-                        ->where('name', 'ILIKE', "%{$search}%")
-                        ->orWhere('email', 'ILIKE', "%{$search}%")
+                        ->where('username', 'ILIKE', "%{$cleanSearch}%")
                         ->orWhereHas('profile', function ($profileQuery) use ($search) {
                             $profileQuery
                                 ->where('artistic_name', 'ILIKE', "%{$search}%")
@@ -28,15 +28,13 @@ class UserController extends Controller
                         });
                 });
             })
-            ->orderBy('name')
+            ->orderBy('username')
             ->limit(20)
             ->get()
             ->map(function ($user) {
                 return [
                     'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'avatar' => $user->avatar ?? null,
+                    'username' => $user->username,
                     'profile' => [
                         'id' => $user->profile?->id,
                         'artistic_name' => $user->profile?->artistic_name,
@@ -70,8 +68,7 @@ class UserController extends Controller
             'data' => [
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
+                    'username' => $user->username,
                     'avatar' => $user->avatar ?? null,
                 ],
                 'profile' => [

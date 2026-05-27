@@ -33,9 +33,7 @@ class ConversationResource extends JsonResource
 
             'participant' => $participant ? [
                 'id' => $participant->id,
-                'name' => $participant->name,
-                'email' => $participant->email,
-                'avatar' => $participant->avatar ?? null,
+                'username' => $participant->username,
                 'profile' => [
                     'artistic_name' => $participant->profile?->artistic_name,
                     'specialty' => $participant->profile?->specialty,
@@ -46,8 +44,7 @@ class ConversationResource extends JsonResource
             'users' => $this->users->map(function ($user) {
                 return [
                     'id' => $user->id,
-                    'name' => $user->name,
-                    'avatar' => $user->avatar ?? null,
+                    'username' => $user->username,
                     'profile' => [
                         'artistic_name' => $user->profile?->artistic_name,
                         'specialty' => $user->profile?->specialty,

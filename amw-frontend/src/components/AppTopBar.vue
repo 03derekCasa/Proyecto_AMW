@@ -152,12 +152,10 @@ export default {
 
         this.currentUserName =
             user?.profile?.artistic_name ||
-            user?.name ||
             this.currentUserName
 
         this.currentUserImage =
             user?.profile?.profile_image_url ||
-            user?.avatar ||
             this.currentUserImage
       } catch (error) {
         localStorage.removeItem('amw_user')

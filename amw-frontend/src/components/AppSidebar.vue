@@ -31,8 +31,8 @@
               {{ userName }}
             </h2>
 
-            <p class="font-manrope text-[10px] uppercase tracking-widest text-stone-500 mt-1">
-              AMW
+            <p class="font-manrope text-[10px] tracking-widest text-primary mt-1 truncate">
+              {{ formattedUsername }}
             </p>
           </div>
         </router-link>
@@ -162,9 +162,20 @@ export default {
     return {
       isExpanded: false,
       userName: 'Artista AMW',
+      userUsername: '',
       userProfileImage: 'https://placehold.co/400x500?text=AMW',
       showCreatePostModal: false,
     }
+  },
+
+  computed: {
+    formattedUsername() {
+      if (!this.userUsername) {
+        return '@amw'
+      }
+
+      return `@${String(this.userUsername).replace(/^@/, '')}`
+    },
   },
 
   mounted() {
@@ -200,6 +211,10 @@ export default {
             profileData?.artistic_name ||
             this.userName
 
+        this.userUsername =
+            profileData?.username ||
+            this.userUsername
+
         this.userProfileImage =
             profileData?.profile_image_url ||
             this.userProfileImage
@@ -224,12 +239,14 @@ export default {
 
         this.userName =
             user?.profile?.artistic_name ||
-            user?.name ||
             this.userName
+
+        this.userUsername =
+            user?.username ||
+            this.userUsername
 
         this.userProfileImage =
             user?.profile?.profile_image_url ||
-            user?.avatar ||
             this.userProfileImage
       } catch (error) {
         localStorage.removeItem('amw_user')

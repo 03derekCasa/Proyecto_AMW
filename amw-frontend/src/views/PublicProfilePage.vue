@@ -24,21 +24,21 @@
       <template v-else>
         <!-- Header perfil -->
         <header class="relative px-12 mb-32">
-          <div class="w-full h-[512px] bg-surface-container-low relative overflow-hidden">
+          <div class="w-full h-[512px] bg-surface-container-low relative overflow-hidden rounded-3xl">
             <img
-                class="w-full h-full object-cover grayscale opacity-70 mix-blend-multiply"
+                class="w-full h-full object-cover rounded-3xl grayscale opacity-70 mix-blend-multiply"
                 :src="displayCoverImage"
                 :alt="ui.coverImageOf(userName)"
             />
 
-            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface/80" aria-hidden="true"></div>
+            <div class="absolute inset-0 rounded-3xl bg-gradient-to-b from-transparent to-surface/80" aria-hidden="true"></div>
           </div>
 
           <div class="absolute bottom-[-80px] left-24 flex items-end gap-12">
             <div class="relative">
-              <div class="w-48 h-64 bg-stone-200 overflow-hidden border-8 border-surface shadow-2xl">
+              <div class="w-48 h-64 bg-stone-200 overflow-hidden rounded-2xl border-8 border-surface shadow-2xl">
                 <img
-                    class="w-full h-full object-cover"
+                    class="w-full h-full object-cover rounded-xl"
                     :src="userProfileImage"
                     :alt="ui.profileImageOf(userName)"
                 />
@@ -56,6 +56,10 @@
               >
                 {{ userName }}
               </h1>
+
+              <p class="font-manrope text-sm text-primary font-medium mb-2">
+                {{ formattedUsername }}
+              </p>
 
               <p class="font-manrope text-sm text-stone-500 uppercase tracking-widest">
                 {{ profile.specialty || ui.artist }}
@@ -101,14 +105,14 @@
         >
           <p
               v-if="successMessage"
-              class="text-green-700 bg-green-50 border border-green-200 px-4 py-3 font-manrope text-sm"
+              class="text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3 font-manrope text-sm"
           >
             {{ successMessage }}
           </p>
 
           <p
               v-if="actionErrorMessage"
-              class="text-red-700 bg-red-50 border border-red-200 px-4 py-3 font-manrope text-sm"
+              class="text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3 font-manrope text-sm"
           >
             {{ actionErrorMessage }}
           </p>
@@ -128,7 +132,7 @@
 
             <div class="mt-12 space-y-8">
               <button
-                  class="w-full py-4 px-12 bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10 disabled:opacity-60"
+                  class="w-full py-4 px-12 rounded-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10 disabled:opacity-60"
                   type="button"
                   :disabled="startingConversation"
                   @click="startConversation"
@@ -142,7 +146,7 @@
                     :href="profile.social_links.website"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
+                    class="material-symbols-outlined p-2 rounded-full border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
                     :aria-label="ui.openWebsite"
                 >
                   language
@@ -153,7 +157,7 @@
                     :href="profile.social_links.instagram"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
+                    class="material-symbols-outlined p-2 rounded-full border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
                     :aria-label="ui.openInstagram"
                 >
                   share
@@ -164,7 +168,7 @@
                     :href="profile.social_links.behance"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="material-symbols-outlined p-2 border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
+                    class="material-symbols-outlined p-2 rounded-full border border-outline-variant/30 text-on-surface cursor-pointer hover:bg-surface-container transition-colors"
                     :aria-label="ui.openBehance"
                 >
                   open_in_new
@@ -179,7 +183,7 @@
               {{ ui.selectedWorks }}
             </h2>
 
-            <div v-if="artworks.length === 0" class="bg-surface-container-low p-12 border border-outline-variant/20">
+            <div v-if="artworks.length === 0" class="bg-surface-container-low p-12 border border-outline-variant/20 rounded-2xl">
               <p class="font-notoSerif text-2xl italic mb-4">
                 {{ ui.emptyWorksTitle }}
               </p>
@@ -192,17 +196,17 @@
             <div v-else class="grid grid-cols-2 gap-16">
               <article v-for="artwork in artworks" :key="artwork.id" class="space-y-6">
                 <div
-                    class="bg-surface-container aspect-[3/4] relative overflow-hidden group cursor-pointer"
+                    class="bg-surface-container aspect-[3/4] relative overflow-hidden rounded-2xl group cursor-pointer"
                     @click="goToPost(artwork.id)"
                 >
                   <img
-                      class="w-full h-full object-cover transition-all duration-700"
+                      class="w-full h-full object-cover rounded-2xl transition-transform duration-700 group-hover:scale-105"
                       :src="artwork.image"
                       :alt="ui.artworkImage(artwork.title)"
                   />
 
-                  <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white px-4 py-2">
+                  <div class="absolute inset-0 rounded-2xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white rounded-full px-4 py-2">
                       {{ ui.viewArtwork }}
                     </span>
                   </div>
@@ -223,7 +227,7 @@
             <div class="mt-32 flex justify-center">
               <router-link
                   to="/feed"
-                  class="px-16 py-4 border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
+                  class="px-16 py-4 rounded-full border-2 border-primary text-primary font-manrope font-bold uppercase tracking-widest text-xs hover:bg-primary hover:text-white transition-all"
               >
                 {{ ui.backToFeed }}
               </router-link>
@@ -428,6 +432,14 @@ export default {
     displayCoverImage() {
       return this.profile.cover_image_url || this.fallbackCoverImage
     },
+
+    formattedUsername() {
+      if (!this.user?.username) {
+        return '@amw'
+      }
+
+      return `@${String(this.user.username).replace(/^@/, '')}`
+    },
   },
 
   async mounted() {
@@ -475,12 +487,10 @@ export default {
 
         this.userName =
             this.profile.artistic_name ||
-            this.user?.name ||
             this.ui.artist
 
         this.userProfileImage =
             this.profile.profile_image_url ||
-            this.user?.avatar ||
             this.userProfileImage
 
         this.userWorksCount = data.stats?.works_count || 0
