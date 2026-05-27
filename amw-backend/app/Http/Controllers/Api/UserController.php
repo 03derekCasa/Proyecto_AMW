@@ -43,6 +43,7 @@ class UserController extends Controller
                         'specialty' => $user->profile?->specialty,
                         'biography' => $user->profile?->biography,
                         'profile_image_url' => $user->profile?->profile_image_url,
+                        'cover_image_url' => $user->profile?->cover_image_url,
                         'social_links' => $user->profile?->social_links,
                     ],
                 ];
@@ -80,6 +81,7 @@ class UserController extends Controller
                     'specialty' => $user->profile?->specialty,
                     'biography' => $user->profile?->biography,
                     'profile_image_url' => $user->profile?->profile_image_url,
+                    'cover_image_url' => $user->profile?->cover_image_url,
                     'social_links' => $user->profile?->social_links,
                 ],
                 'posts' => $posts,

@@ -26,8 +26,8 @@ const messages = {
         },
 
         nav: {
-            feed: 'Feed',
-            profile: 'Portfolio',
+            feed: 'Explorar',
+            profile: 'Perfil',
             collections: 'Colecciones',
             messages: 'Mensajes',
             support: 'Soporte',
@@ -39,7 +39,7 @@ const messages = {
         },
 
         feed: {
-            title: 'Feed',
+            title: 'Explorar',
             description: 'Publicaciones reales cargadas desde la base de datos de AMW.',
             all: 'Todo',
             artworks: 'Obras',
@@ -48,8 +48,8 @@ const messages = {
             loading: 'Cargando publicaciones...',
             emptyTitle: 'No hay publicaciones disponibles.',
             emptyText: 'Cuando existan posts publicados en la base de datos, aparecerán aquí.',
-            like: 'Like',
-            liked: 'Liked',
+            like: 'Dar me gusta',
+            liked: 'Me gusta',
             details: 'Info',
             loadMore: 'Cargar más',
             loadingMore: 'Cargando...',

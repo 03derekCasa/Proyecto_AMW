@@ -12,10 +12,6 @@
           <h1 id="feed-title" class="font-serif text-3xl font-bold">
             {{ $t('feed.title') }}
           </h1>
-
-          <p class="text-sm text-gray-500 mt-2">
-            {{ $t('feed.description') }}
-          </p>
         </div>
 
         <nav

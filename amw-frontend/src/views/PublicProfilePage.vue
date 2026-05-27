@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-surface text-on-surface min-h-screen">
+  <div class="profile-page bg-surface text-on-surface min-h-screen">
     <AppSidebar />
 
     <!-- Top bar -->
@@ -27,9 +27,8 @@
           <div class="w-full h-[512px] bg-surface-container-low relative overflow-hidden">
             <img
                 class="w-full h-full object-cover grayscale opacity-70 mix-blend-multiply"
-                :src="heroImage"
-                alt=""
-                aria-hidden="true"
+                :src="displayCoverImage"
+                :alt="ui.coverImageOf(userName)"
             />
 
             <div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface/80" aria-hidden="true"></div>
@@ -232,18 +231,35 @@
           </div>
         </section>
 
-        <footer class="px-24 py-32 border-t border-stone-200 bg-surface-container-low">
-          <div class="flex justify-between items-start">
-            <div class="max-w-md">
-              <h2 class="font-notoSerif italic text-3xl mb-6">
-                AMW
-              </h2>
+        <!-- Footer -->
+        <footer class="profile-footer" :aria-label="ui.footerLabel">
+          <nav class="profile-footer__links" :aria-label="ui.footerNavigation">
+            <a
+              href="tel:+34976123456"
+              class="profile-footer__link"
+              :aria-label="ui.contactPhoneLabel"
+            >
+              {{ ui.contactPhone }}
+            </a>
 
-              <p class="font-manrope text-sm text-stone-500 leading-relaxed">
-                {{ ui.footerDescription }}
-              </p>
-            </div>
-          </div>
+            <router-link
+              to="/terms"
+              class="profile-footer__link"
+            >
+              {{ ui.terms }}
+            </router-link>
+
+            <router-link
+              to="/help"
+              class="profile-footer__link"
+            >
+              {{ ui.help }}
+            </router-link>
+          </nav>
+
+          <p class="profile-footer__copyright">
+            {{ ui.copyright }}
+          </p>
         </footer>
       </template>
     </main>
@@ -276,13 +292,20 @@ const publicProfileTexts = {
     emptyWorksText: 'Cuando este usuario publique obras en AMW, aparecerán aquí.',
     viewArtwork: 'Ver obra',
     backToFeed: 'Volver al feed',
-    footerDescription: 'Perfil público de artista dentro de Art Makes A Way.',
+    footerLabel: 'Pie de página de AMW',
+    footerNavigation: 'Enlaces de información y soporte',
+    contactPhone: 'Contacto: +34 976 123 456',
+    contactPhoneLabel: 'Llamar al teléfono de contacto de AMW',
+    terms: 'Términos',
+    help: 'Ayuda',
+    copyright: '© 2026 AMW · Art Makes A Way',
     notFound: 'No se encontró el perfil solicitado.',
     loadError: 'No se pudo cargar el perfil público.',
     conversationReady: 'Conversación preparada correctamente.',
     conversationError: 'No se pudo iniciar la conversación.',
     artwork: 'Obra',
     profileImageOf: (name) => `Imagen de perfil de ${name}`,
+    coverImageOf: (name) => `Imagen de cabecera del portfolio de ${name}`,
     artworkImage: (title) => `Obra ${title}`,
   },
   en: {
@@ -305,13 +328,20 @@ const publicProfileTexts = {
     emptyWorksText: 'When this user publishes artworks on AMW, they will appear here.',
     viewArtwork: 'View artwork',
     backToFeed: 'Back to feed',
-    footerDescription: 'Public artist profile within Art Makes A Way.',
+    footerLabel: 'AMW footer',
+    footerNavigation: 'Information and support links',
+    contactPhone: 'Contact: +34 976 123 456',
+    contactPhoneLabel: 'Call the AMW contact number',
+    terms: 'Terms',
+    help: 'Help',
+    copyright: '© 2026 AMW · Art Makes A Way',
     notFound: 'The requested profile was not found.',
     loadError: 'The public profile could not be loaded.',
     conversationReady: 'Conversation ready.',
     conversationError: 'The conversation could not be started.',
     artwork: 'Artwork',
     profileImageOf: (name) => `Profile image of ${name}`,
+    coverImageOf: (name) => `Portfolio cover image of ${name}`,
     artworkImage: (title) => `Artwork ${title}`,
   },
   fr: {
@@ -334,13 +364,20 @@ const publicProfileTexts = {
     emptyWorksText: "Lorsque cet utilisateur publiera des œuvres sur AMW, elles apparaîtront ici.",
     viewArtwork: "Voir l'œuvre",
     backToFeed: 'Retour au fil',
-    footerDescription: "Profil public d'artiste au sein d'Art Makes A Way.",
+    footerLabel: 'Pied de page AMW',
+    footerNavigation: "Liens d'information et d'assistance",
+    contactPhone: 'Contact : +34 976 123 456',
+    contactPhoneLabel: 'Appeler le numéro de contact AMW',
+    terms: 'Conditions',
+    help: 'Aide',
+    copyright: '© 2026 AMW · Art Makes A Way',
     notFound: 'Le profil demandé est introuvable.',
     loadError: "Le profil public n'a pas pu être chargé.",
     conversationReady: 'Conversation prête.',
     conversationError: "La conversation n'a pas pu être démarrée.",
     artwork: 'Œuvre',
     profileImageOf: (name) => `Image de profil de ${name}`,
+    coverImageOf: (name) => `Image de couverture du portfolio de ${name}`,
     artworkImage: (title) => `Œuvre ${title}`,
   },
 }
@@ -367,6 +404,7 @@ export default {
         specialty: '',
         biography: '',
         profile_image_url: '',
+        cover_image_url: '',
         social_links: {},
       },
 
@@ -375,7 +413,7 @@ export default {
       userWorksCount: 0,
       userFollowers: '0',
       userFollowing: 0,
-      heroImage:
+      fallbackCoverImage:
           'https://www.guiarepsol.com/content/dam/repsol-guia/contenidos-imagenes/viajar/nos-gusta/nuevas-exposiciones-madrid/gr-cms-media-featured_images-none-867ebd3f-4b8b-4725-afe5-ea38e18aedec-saura-3.jpg',
 
       artworks: [],
@@ -385,6 +423,10 @@ export default {
   computed: {
     ui() {
       return publicProfileTexts[this.$i18n.locale] || publicProfileTexts.es
+    },
+
+    displayCoverImage() {
+      return this.profile.cover_image_url || this.fallbackCoverImage
     },
   },
 
@@ -512,15 +554,77 @@ export default {
 </script>
 
 <style scoped>
+.profile-page {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Roboto", "Helvetica Neue", Arial, sans-serif;
+}
+
+.profile-page .font-notoSerif,
+.profile-page .font-manrope {
+  font-family: inherit;
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-.font-notoSerif {
-  font-family: 'Noto Serif', serif;
+
+.profile-footer {
+  width: 100%;
+  margin-top: 5rem;
+  padding: 2.25rem 1.5rem 2.75rem;
+  border-top: 1px solid rgba(120, 113, 108, 0.14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.15rem;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Roboto", "Helvetica Neue", Arial, sans-serif;
 }
 
-.font-manrope {
-  font-family: 'Manrope', sans-serif;
+.profile-footer__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: 1.6rem;
+  row-gap: 0.75rem;
 }
+
+.profile-footer__link {
+  color: #78716c;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.profile-footer__link:hover,
+.profile-footer__link:focus-visible {
+  color: #a900a9;
+}
+
+.profile-footer__copyright {
+  color: #a8a29e;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .profile-footer {
+    margin-top: 3.5rem;
+    padding: 1.75rem 1rem 2.25rem;
+  }
+
+  .profile-footer__links {
+    column-gap: 1rem;
+  }
+
+  .profile-footer__link,
+  .profile-footer__copyright {
+    font-size: 0.7rem;
+  }
+}
+
 </style>

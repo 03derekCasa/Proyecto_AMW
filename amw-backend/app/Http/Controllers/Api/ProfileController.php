@@ -11,24 +11,11 @@ class ProfileController extends Controller
 {
     public function show(Request $request)
     {
-        $profile = $request->user()
-            ->profile()
-            ->firstOrCreate(
-                ['user_id' => $request->user()->id],
-                ['artistic_name' => $request->user()->name]
-            );
+        $profile = $this->getOrCreateProfile($request);
 
         return response()->json([
             'message' => 'Perfil obtenido correctamente',
-            'data' => [
-                'id' => $profile->id,
-                'user_id' => $profile->user_id,
-                'artistic_name' => $profile->artistic_name,
-                'specialty' => $profile->specialty,
-                'biography' => $profile->biography,
-                'profile_image_url' => $profile->profile_image_url,
-                'social_links' => $profile->social_links,
-            ],
+            'data' => $this->profileData($profile),
         ]);
     }
 
@@ -46,12 +33,7 @@ class ProfileController extends Controller
             'social_links.youtube' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $profile = $request->user()
-            ->profile()
-            ->firstOrCreate(
-                ['user_id' => $request->user()->id],
-                ['artistic_name' => $request->user()->name]
-            );
+        $profile = $this->getOrCreateProfile($request);
 
         $profile->update([
             'artistic_name' => $validated['artistic_name'],
@@ -62,15 +44,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => 'Perfil actualizado correctamente',
-            'data' => [
-                'id' => $profile->id,
-                'user_id' => $profile->user_id,
-                'artistic_name' => $profile->artistic_name,
-                'specialty' => $profile->specialty,
-                'biography' => $profile->biography,
-                'profile_image_url' => $profile->profile_image_url,
-                'social_links' => $profile->social_links,
-            ],
+            'data' => $this->profileData($profile),
         ]);
     }
 
@@ -80,20 +54,9 @@ class ProfileController extends Controller
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
-        $profile = $request->user()
-            ->profile()
-            ->firstOrCreate(
-                ['user_id' => $request->user()->id],
-                ['artistic_name' => $request->user()->name]
-            );
+        $profile = $this->getOrCreateProfile($request);
 
-        if ($profile->profile_image_url && str_contains($profile->profile_image_url, '/storage/')) {
-            $oldPath = explode('/storage/', $profile->profile_image_url)[1] ?? null;
-
-            if ($oldPath) {
-                Storage::disk('public')->delete($oldPath);
-            }
-        }
+        $this->deleteStoredImage($profile->profile_image_url);
 
         $path = $validated['image']->store('profiles', 'public');
 
@@ -107,5 +70,66 @@ class ProfileController extends Controller
                 'profile_image_url' => $profile->profile_image_url,
             ],
         ], 201);
+    }
+
+    public function uploadCoverImage(Request $request)
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        ]);
+
+        $profile = $this->getOrCreateProfile($request);
+
+        $this->deleteStoredImage($profile->cover_image_url);
+
+        $path = $validated['image']->store('profile-covers', 'public');
+
+        $profile->update([
+            'cover_image_url' => asset('storage/' . $path),
+        ]);
+
+        return response()->json([
+            'message' => 'Imagen de cabecera subida correctamente',
+            'data' => [
+                'cover_image_url' => $profile->cover_image_url,
+            ],
+        ], 201);
+    }
+
+    private function getOrCreateProfile(Request $request): Profile
+    {
+        return $request->user()
+            ->profile()
+            ->firstOrCreate(
+                ['user_id' => $request->user()->id],
+                ['artistic_name' => $request->user()->name]
+            );
+    }
+
+    private function deleteStoredImage(?string $imageUrl): void
+    {
+        if (!$imageUrl || !str_contains($imageUrl, '/storage/')) {
+            return;
+        }
+
+        $oldPath = explode('/storage/', $imageUrl)[1] ?? null;
+
+        if ($oldPath) {
+            Storage::disk('public')->delete($oldPath);
+        }
+    }
+
+    private function profileData(Profile $profile): array
+    {
+        return [
+            'id' => $profile->id,
+            'user_id' => $profile->user_id,
+            'artistic_name' => $profile->artistic_name,
+            'specialty' => $profile->specialty,
+            'biography' => $profile->biography,
+            'profile_image_url' => $profile->profile_image_url,
+            'cover_image_url' => $profile->cover_image_url,
+            'social_links' => $profile->social_links,
+        ];
     }
 }

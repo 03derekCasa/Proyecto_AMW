@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-surface text-on-surface min-h-screen">
+  <div class="profile-page bg-surface text-on-surface min-h-screen">
     <!-- Top bar -->
 
     <AppTopBar
@@ -20,7 +20,7 @@
         <div class="w-full h-[512px] bg-surface-container-low relative overflow-hidden">
           <img
               class="w-full h-full object-cover grayscale opacity-70 mix-blend-multiply"
-              :src="heroImage"
+              :src="displayCoverImage"
               :alt="ui.headerImage"
           />
           <div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface/80"></div>
@@ -31,7 +31,7 @@
             <div class="w-48 h-64 bg-stone-200 overflow-hidden border-8 border-surface shadow-2xl">
               <img
                   class="w-full h-full object-cover"
-                  :src="userProfileImage"
+                  :src="displayProfileImage"
                   :alt="ui.profileImage"
               />
             </div>
@@ -170,12 +170,59 @@
                   {{ ui.profileImageLabel }}
                 </label>
 
+                <div class="flex items-center gap-4 mb-3">
+                  <img
+                      class="w-16 h-16 rounded-full object-cover border border-outline-variant/30"
+                      :src="displayProfileImage"
+                      :alt="ui.profileImage"
+                  />
+
+                  <div class="font-manrope text-xs text-stone-500">
+                    <p>{{ ui.profileImageHelp }}</p>
+                    <p v-if="selectedProfileImageFile" class="mt-1 text-primary font-bold">
+                      {{ ui.previewReady }}
+                    </p>
+                  </div>
+                </div>
+
                 <input
                     id="profile-image"
+                    ref="profileImageInput"
                     name="profile_image"
                     type="file"
-                    accept="image/*"
-                    @change="handleImageChange"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    @change="handleProfileImageSelection"
+                    class="font-manrope text-sm"
+                />
+              </div>
+
+              <div>
+                <label for="cover-image" class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400 block mb-2">
+                  {{ ui.coverImageLabel }}
+                </label>
+
+                <div class="mb-3 overflow-hidden border border-outline-variant/30 bg-surface">
+                  <img
+                      class="w-full h-28 object-cover"
+                      :src="displayCoverImage"
+                      :alt="ui.headerImage"
+                  />
+                </div>
+
+                <p class="font-manrope text-xs text-stone-500 mb-3">
+                  {{ ui.coverImageHelp }}
+                  <span v-if="selectedCoverImageFile" class="block mt-1 text-primary font-bold">
+                    {{ ui.previewReady }}
+                  </span>
+                </p>
+
+                <input
+                    id="cover-image"
+                    ref="coverImageInput"
+                    name="cover_image"
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    @change="handleCoverImageSelection"
                     class="font-manrope text-sm"
                 />
               </div>
@@ -401,20 +448,42 @@
       </section>
 
       <!-- Footer -->
-      <footer class="px-24 py-32 border-t border-stone-200 bg-surface-container-low">
-        <div class="flex justify-between items-start">
-          <div class="max-w-md">
-            <h4 class="font-notoSerif italic text-3xl mb-6">
-              AMW
-            </h4>
+      <footer class="profile-footer" :aria-label="ui.footerLabel">
+        <nav class="profile-footer__links" :aria-label="ui.footerNavigation">
+          <a
+            href="tel:+34976123456"
+            class="profile-footer__link"
+            :aria-label="ui.contactPhoneLabel"
+          >
+            {{ ui.contactPhone }}
+          </a>
 
-            <p class="font-manrope text-sm text-stone-500 leading-relaxed">
-              {{ ui.footerDescription }}
-            </p>
-          </div>
-        </div>
+          <router-link
+            to="/terms"
+            class="profile-footer__link"
+          >
+            {{ ui.terms }}
+          </router-link>
+
+          <router-link
+            to="/help"
+            class="profile-footer__link"
+          >
+            {{ ui.help }}
+          </router-link>
+        </nav>
+
+        <p class="profile-footer__copyright">
+          {{ ui.copyright }}
+        </p>
       </footer>
     </main>
+
+    <CoverImageCropModal
+        v-model="showCoverCropModal"
+        :image-src="coverOriginalPreviewUrl"
+        @cropped="handleCroppedCover"
+    />
   </div>
 </template>
 
@@ -423,10 +492,12 @@ import {
   getProfile,
   updateProfile,
   uploadProfileImage,
+  uploadCoverImage,
 } from '@/services/profileService'
 
 import { getMyPosts } from '@/services/postService'
 import { logoutUser } from '@/services/authService'
+import CoverImageCropModal from '@/components/CoverImageCropModal.vue'
 
 const profileTexts = {
   es: {
@@ -445,6 +516,10 @@ const profileTexts = {
     biography: 'Biografía',
     biographyPlaceholder: 'Describe tu trayectoria artística, intereses y estilo...',
     profileImageLabel: 'Imagen de perfil',
+    profileImageHelp: 'JPG, PNG o WEBP. Máximo 2 MB.',
+    coverImageLabel: 'Imagen de cabecera',
+    coverImageHelp: 'Selecciona una imagen y ajusta el encuadre antes de guardarla. La portada final será panorámica.',
+    previewReady: 'Previsualización pendiente de guardar.',
     website: 'Web personal',
     cancel: 'Cancelar',
     saving: 'Guardando...',
@@ -461,12 +536,21 @@ const profileTexts = {
     viewArtwork: 'Ver obra',
     viewFullPortfolio: 'Ver más publicaciones',
     artwork: 'Obra',
-    footerDescription: 'Un espacio digital dedicado a la intersección entre las bellas artes y la cultura digital moderna. Celebramos al artista como arquitecto principal de la sociedad.',
+    footerLabel: 'Pie de página de AMW',
+    footerNavigation: 'Enlaces de información y soporte',
+    contactPhone: 'Contacto: +34 976 123 456',
+    contactPhoneLabel: 'Llamar al teléfono de contacto de AMW',
+    terms: 'Términos',
+    help: 'Ayuda',
+    copyright: '© 2026 AMW · Art Makes A Way',
     profileLoadedError: 'No se pudo cargar el perfil.',
     profileUpdated: 'Perfil actualizado correctamente.',
     profileUpdateError: 'No se pudo actualizar el perfil.',
     imageUpdated: 'Imagen de perfil actualizada correctamente.',
     imageError: 'No se pudo subir la imagen.',
+    invalidImage: 'El archivo seleccionado debe ser una imagen JPG, PNG o WEBP.',
+    profileImageTooLarge: 'La imagen de perfil no puede superar los 2 MB.',
+    coverImageTooLarge: 'La imagen original de cabecera no puede superar los 12 MB.',
   },
   en: {
     headerImage: 'Portfolio header image',
@@ -484,6 +568,10 @@ const profileTexts = {
     biography: 'Biography',
     biographyPlaceholder: 'Describe your artistic career, interests and style...',
     profileImageLabel: 'Profile image',
+    profileImageHelp: 'JPG, PNG or WEBP. Maximum 2 MB.',
+    coverImageLabel: 'Cover image',
+    coverImageHelp: 'Select an image and adjust its framing before saving. The final cover will be panoramic.',
+    previewReady: 'Preview pending save.',
     website: 'Personal website',
     cancel: 'Cancel',
     saving: 'Saving...',
@@ -500,12 +588,21 @@ const profileTexts = {
     viewArtwork: 'View artwork',
     viewFullPortfolio: 'View more publications',
     artwork: 'Artwork',
-    footerDescription: 'A digital space dedicated to the intersection of fine arts and modern digital culture. We celebrate the artist as a principal architect of society.',
+    footerLabel: 'AMW footer',
+    footerNavigation: 'Information and support links',
+    contactPhone: 'Contact: +34 976 123 456',
+    contactPhoneLabel: 'Call the AMW contact number',
+    terms: 'Terms',
+    help: 'Help',
+    copyright: '© 2026 AMW · Art Makes A Way',
     profileLoadedError: 'The profile could not be loaded.',
     profileUpdated: 'Profile updated successfully.',
     profileUpdateError: 'The profile could not be updated.',
     imageUpdated: 'Profile image updated successfully.',
     imageError: 'The image could not be uploaded.',
+    invalidImage: 'The selected file must be a JPG, PNG or WEBP image.',
+    profileImageTooLarge: 'The profile image cannot exceed 2 MB.',
+    coverImageTooLarge: 'The original cover image cannot exceed 12 MB.',
   },
   fr: {
     headerImage: 'Image d’en-tête du portfolio',
@@ -523,6 +620,10 @@ const profileTexts = {
     biography: 'Biographie',
     biographyPlaceholder: 'Décrivez votre parcours artistique, vos intérêts et votre style...',
     profileImageLabel: 'Image de profil',
+    profileImageHelp: 'JPG, PNG ou WEBP. Maximum 2 Mo.',
+    coverImageLabel: 'Image de couverture',
+    coverImageHelp: 'Sélectionnez une image et ajustez le cadrage avant de sauvegarder. La couverture finale sera panoramique.',
+    previewReady: 'Aperçu en attente d’enregistrement.',
     website: 'Site personnel',
     cancel: 'Annuler',
     saving: 'Enregistrement...',
@@ -539,17 +640,30 @@ const profileTexts = {
     viewArtwork: 'Voir l’œuvre',
     viewFullPortfolio: 'Voir plus de publications',
     artwork: 'Œuvre',
-    footerDescription: 'Un espace numérique dédié à la rencontre entre les beaux-arts et la culture numérique moderne. Nous célébrons l’artiste comme un architecte essentiel de la société.',
+    footerLabel: 'Pied de page AMW',
+    footerNavigation: "Liens d'information et d'assistance",
+    contactPhone: 'Contact : +34 976 123 456',
+    contactPhoneLabel: 'Appeler le numéro de contact AMW',
+    terms: 'Conditions',
+    help: 'Aide',
+    copyright: '© 2026 AMW · Art Makes A Way',
     profileLoadedError: 'Le profil n’a pas pu être chargé.',
     profileUpdated: 'Profil mis à jour correctement.',
     profileUpdateError: 'Le profil n’a pas pu être mis à jour.',
     imageUpdated: 'Image de profil mise à jour correctement.',
     imageError: 'L’image n’a pas pu être téléchargée.',
+    invalidImage: 'Le fichier sélectionné doit être une image JPG, PNG ou WEBP.',
+    profileImageTooLarge: 'L’image de profil ne peut pas dépasser 2 Mo.',
+    coverImageTooLarge: 'L’image originale de couverture ne peut pas dépasser 12 Mo.',
   },
 }
 
 export default {
   name: 'ProfilePage',
+
+  components: {
+    CoverImageCropModal,
+  },
 
   data() {
     return {
@@ -563,6 +677,7 @@ export default {
         specialty: '',
         biography: '',
         profile_image_url: '',
+        cover_image_url: '',
         social_links: {
           instagram: '',
           behance: '',
@@ -578,8 +693,16 @@ export default {
       userFollowers: '0',
       userFollowing: 0,
 
-      heroImage:
+      fallbackCoverImage:
           'https://www.guiarepsol.com/content/dam/repsol-guia/contenidos-imagenes/viajar/nos-gusta/nuevas-exposiciones-madrid/gr-cms-media-featured_images-none-867ebd3f-4b8b-4725-afe5-ea38e18aedec-saura-3.jpg',
+
+      selectedProfileImageFile: null,
+      selectedCoverImageFile: null,
+      profileImagePreview: '',
+      coverImagePreview: '',
+      coverOriginalPreviewUrl: '',
+      showCoverCropModal: false,
+      profileSnapshot: null,
 
       artworks: [],
     }
@@ -588,6 +711,14 @@ export default {
   computed: {
     ui() {
       return profileTexts[this.$i18n.locale] || profileTexts.es
+    },
+
+    displayProfileImage() {
+      return this.profileImagePreview || this.profile.profile_image_url || this.userProfileImage
+    },
+
+    displayCoverImage() {
+      return this.coverImagePreview || this.profile.cover_image_url || this.fallbackCoverImage
     },
   },
 
@@ -600,6 +731,7 @@ export default {
 
   beforeUnmount() {
     window.removeEventListener('amw-post-created', this.handlePostCreated)
+    this.clearPendingImages()
   },
 
   methods: {
@@ -612,7 +744,21 @@ export default {
     },
 
     toggleEditForm() {
-      this.isEditing = !this.isEditing
+      if (this.isEditing) {
+        if (this.profileSnapshot) {
+          this.profile = JSON.parse(JSON.stringify(this.profileSnapshot))
+        }
+
+        this.clearPendingImages()
+        this.showCoverCropModal = false
+        this.profileSnapshot = null
+        this.isEditing = false
+      } else {
+        this.profileSnapshot = JSON.parse(JSON.stringify(this.profile))
+        this.clearPendingImages()
+        this.isEditing = true
+      }
+
       this.successMessage = ''
       this.errorMessage = ''
     },
@@ -696,11 +842,26 @@ export default {
           },
         }
 
-        this.userName = data.artistic_name || this.userName
+        if (this.selectedProfileImageFile) {
+          const imageResponse = await uploadProfileImage(this.selectedProfileImageFile)
+          this.profile.profile_image_url = imageResponse.data.profile_image_url
+          this.userProfileImage = imageResponse.data.profile_image_url
+        }
+
+        if (this.selectedCoverImageFile) {
+          const coverResponse = await uploadCoverImage(this.selectedCoverImageFile)
+          this.profile.cover_image_url = coverResponse.data.cover_image_url
+        }
+
+        this.userName = this.profile.artistic_name || this.userName
         this.successMessage = this.ui.profileUpdated
+        this.profileSnapshot = null
+        this.clearPendingImages()
         this.isEditing = false
       } catch (error) {
-        if (error.response?.data?.message) {
+        if (error.response?.data?.errors?.image?.[0]) {
+          this.errorMessage = error.response.data.errors.image[0]
+        } else if (error.response?.data?.message) {
           this.errorMessage = error.response.data.message
         } else {
           this.errorMessage = this.ui.profileUpdateError
@@ -710,27 +871,96 @@ export default {
       }
     },
 
-    async handleImageChange(event) {
+    handleProfileImageSelection(event) {
       const file = event.target.files[0]
 
       if (!file) {
         return
       }
 
-      this.loading = true
-      this.successMessage = ''
+      if (!this.validateImage(file, 2 * 1024 * 1024, this.ui.profileImageTooLarge)) {
+        event.target.value = ''
+        return
+      }
+
+      this.revokePreview(this.profileImagePreview)
+      this.selectedProfileImageFile = file
+      this.profileImagePreview = URL.createObjectURL(file)
       this.errorMessage = ''
+    },
 
-      try {
-        const response = await uploadProfileImage(file)
+    handleCoverImageSelection(event) {
+      const file = event.target.files[0]
 
-        this.profile.profile_image_url = response.data.profile_image_url
-        this.userProfileImage = response.data.profile_image_url
-        this.successMessage = this.ui.imageUpdated
-      } catch (error) {
-        this.errorMessage = this.ui.imageError
-      } finally {
-        this.loading = false
+      if (!file) {
+        return
+      }
+
+      /*
+       * La imagen original solo se utiliza en el navegador para recortarla.
+       * El backend recibirá la versión panorámica generada por el editor.
+       */
+      if (!this.validateImage(file, 12 * 1024 * 1024, this.ui.coverImageTooLarge)) {
+        event.target.value = ''
+        return
+      }
+
+      this.revokePreview(this.coverOriginalPreviewUrl)
+      this.coverOriginalPreviewUrl = URL.createObjectURL(file)
+      this.showCoverCropModal = true
+      this.errorMessage = ''
+      event.target.value = ''
+    },
+
+    handleCroppedCover({ file, previewUrl }) {
+      this.revokePreview(this.coverImagePreview)
+
+      this.selectedCoverImageFile = file
+      this.coverImagePreview = previewUrl
+      this.showCoverCropModal = false
+      this.errorMessage = ''
+    },
+
+    validateImage(file, maxSize, sizeError) {
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+
+      if (!validTypes.includes(file.type)) {
+        this.errorMessage = this.ui.invalidImage
+        return false
+      }
+
+      if (file.size > maxSize) {
+        this.errorMessage = sizeError
+        return false
+      }
+
+      return true
+    },
+
+    revokePreview(previewUrl) {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    },
+
+    clearPendingImages() {
+      this.revokePreview(this.profileImagePreview)
+      this.revokePreview(this.coverImagePreview)
+      this.revokePreview(this.coverOriginalPreviewUrl)
+
+      this.selectedProfileImageFile = null
+      this.selectedCoverImageFile = null
+      this.profileImagePreview = ''
+      this.coverImagePreview = ''
+      this.coverOriginalPreviewUrl = ''
+      this.showCoverCropModal = false
+
+      if (this.$refs.profileImageInput) {
+        this.$refs.profileImageInput.value = ''
+      }
+
+      if (this.$refs.coverImageInput) {
+        this.$refs.coverImageInput.value = ''
       }
     },
 
@@ -749,4 +979,76 @@ export default {
 </script>
 
 <style scoped>
+.profile-page {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Roboto", "Helvetica Neue", Arial, sans-serif;
+}
+
+.profile-page .font-notoSerif,
+.profile-page .font-manrope {
+  font-family: inherit;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.profile-footer {
+  width: 100%;
+  margin-top: 5rem;
+  padding: 2.25rem 1.5rem 2.75rem;
+  border-top: 1px solid rgba(120, 113, 108, 0.14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.15rem;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Roboto", "Helvetica Neue", Arial, sans-serif;
+}
+
+.profile-footer__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: 1.6rem;
+  row-gap: 0.75rem;
+}
+
+.profile-footer__link {
+  color: #78716c;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.profile-footer__link:hover,
+.profile-footer__link:focus-visible {
+  color: #a900a9;
+}
+
+.profile-footer__copyright {
+  color: #a8a29e;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .profile-footer {
+    margin-top: 3.5rem;
+    padding: 1.75rem 1rem 2.25rem;
+  }
+
+  .profile-footer__links {
+    column-gap: 1rem;
+  }
+
+  .profile-footer__link,
+  .profile-footer__copyright {
+    font-size: 0.7rem;
+  }
+}
+
 </style>
