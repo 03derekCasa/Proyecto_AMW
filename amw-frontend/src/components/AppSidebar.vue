@@ -50,9 +50,11 @@
           <span v-if="isActive('/feed')" class="sidebar-active-line" aria-hidden="true"></span>
 
           <span class="sidebar-icon-slot">
-            <span class="material-symbols-outlined" aria-hidden="true">
-              palette
-            </span>
+            <span
+              :style="{ '--sidebar-icon-image': `url(${icons.explorar})` }"
+              class="sidebar-nav-icon sidebar-nav-icon--explorar"
+              aria-hidden="true"
+            ></span>
           </span>
 
           <span
@@ -72,9 +74,11 @@
           <span v-if="isActive('/profile')" class="sidebar-active-line" aria-hidden="true"></span>
 
           <span class="sidebar-icon-slot">
-            <span class="material-symbols-outlined" aria-hidden="true">
-              brush
-            </span>
+            <span
+              :style="{ '--sidebar-icon-image': `url(${icons.perfil})` }"
+              class="sidebar-nav-icon sidebar-nav-icon--perfil"
+              aria-hidden="true"
+            ></span>
           </span>
 
           <span
@@ -94,9 +98,11 @@
           <span v-if="isActive('/collections')" class="sidebar-active-line" aria-hidden="true"></span>
 
           <span class="sidebar-icon-slot">
-            <span class="material-symbols-outlined" aria-hidden="true">
-              gallery_thumbnail
-            </span>
+            <span
+              :style="{ '--sidebar-icon-image': `url(${icons.colecciones})` }"
+              class="sidebar-nav-icon sidebar-nav-icon--colecciones"
+              aria-hidden="true"
+            ></span>
           </span>
 
           <span
@@ -116,9 +122,11 @@
           <span v-if="isActive('/messages')" class="sidebar-active-line" aria-hidden="true"></span>
 
           <span class="sidebar-icon-slot">
-            <span class="material-symbols-outlined" aria-hidden="true">
-              forum
-            </span>
+            <span
+              :style="{ '--sidebar-icon-image': `url(${icons.mensajes})` }"
+              class="sidebar-nav-icon sidebar-nav-icon--mensajes"
+              aria-hidden="true"
+            ></span>
           </span>
 
           <span
@@ -213,6 +221,10 @@
 <script>
 import api from '@/services/api'
 import CreatePostModal from '@/components/CreatePostModal.vue'
+import explorarIcon from '@/assets/Explorar.svg'
+import perfilIcon from '@/assets/Perfil.svg'
+import coleccionesIcon from '@/assets/Colecciones.svg'
+import mensajesIcon from '@/assets/Mensajes.svg'
 
 export default {
   name: 'AppSidebar',
@@ -224,6 +236,12 @@ export default {
   data() {
     return {
       isExpanded: false,
+      icons: {
+        explorar: explorarIcon,
+        perfil: perfilIcon,
+        colecciones: coleccionesIcon,
+        mensajes: mensajesIcon,
+      },
       userName: 'Artista AMW',
       userUsername: '',
       userProfileImage: 'https://placehold.co/400x500?text=AMW',
@@ -402,6 +420,52 @@ export default {
 }
 
 /*
+ * Iconos SVG de navegación:
+ * Se muestran como máscara para que adopten el mismo color que el texto.
+ * De este modo, el hover y el estado activo animan icono y etiqueta a la vez.
+ */
+.sidebar-nav-icon {
+  display: block;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask-image: var(--sidebar-icon-image);
+  mask-image: var(--sidebar-icon-image);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transition: background-color 0.2s ease;
+}
+
+/*
+ * Ajuste individual de tamaños.
+ * Modifica estos cuatro valores hasta que los iconos se vean equilibrados.
+ * Explorar y Mensajes se dejan algo más pequeños porque visualmente
+ * ocupan más espacio que Perfil y Colecciones.
+ */
+.sidebar-nav-icon--explorar {
+  width: 22px;
+  height: 22px;
+}
+
+.sidebar-nav-icon--perfil {
+  width: 25px;
+  height: 25px;
+}
+
+.sidebar-nav-icon--colecciones {
+  width: 25px;
+  height: 25px;
+}
+
+.sidebar-nav-icon--mensajes {
+  width: 22px;
+  height: 22px;
+}
+
+/*
  * El texto no se crea y destruye con v-if.
  * Permanece en el DOM y solo se desliza/aparece.
  */
@@ -446,8 +510,6 @@ export default {
 
 /*
  * Botón de subir obra:
- * cerrado: solo se ve una pastilla de 44px centrada en el carril del icono.
- * abierto: se extiende el fondo, pero el + mantiene su posición.
  */
 .sidebar-upload-button {
   position: relative;
