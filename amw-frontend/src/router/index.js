@@ -10,6 +10,8 @@ import CollectionsPage from '../views/CollectionsPage.vue'
 import MessagesPage from '../views/MessagesPage.vue'
 import PublicProfilePage from '../views/PublicProfilePage.vue'
 import PostDetailPage from '../views/PostDetailPage.vue'
+import PublicHelpPage from '../views/PublicHelpPage.vue'
+import PublicTermsPage from '../views/PublicTermsPage.vue'
 
 const routes = [
     {
@@ -83,6 +85,16 @@ const routes = [
         meta: {
             requiresAuth: true,
         },
+    },
+    {
+        path: '/public/help',
+        name: 'public-help',
+        component: PublicHelpPage,
+    },
+    {
+        path: '/public/terms',
+        name: 'public-terms',
+        component: PublicTermsPage,
     },
 ]
 

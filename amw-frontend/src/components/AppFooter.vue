@@ -9,14 +9,14 @@
 
       <nav aria-label="Enlaces legales y ayuda" class="flex flex-col sm:flex-row items-center gap-4">
         <router-link
-            to="/terms"
+            to="/public/terms"
             class="font-manrope text-xs uppercase tracking-widest text-stone-600 hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
         >
           Términos y condiciones
         </router-link>
 
         <router-link
-            to="/help"
+            to="/public/help"
             class="font-manrope text-xs uppercase tracking-widest text-stone-600 hover:text-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
         >
           Ayuda al cliente
