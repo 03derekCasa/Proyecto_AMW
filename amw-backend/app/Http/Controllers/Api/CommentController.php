@@ -6,16 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
+use App\Notifications\PostCommentedNotification;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function index($postId)
+    public function index(Request $request, $postId)
     {
         $post = Post::where('is_published', true)->findOrFail($postId);
+        $currentUserId = auth('sanctum')->user()?->id;
 
         $comments = $post->comments()
             ->with(['user.profile'])
+            ->withCount('likes')
+            ->when($currentUserId, function ($query) use ($currentUserId) {
+                $query->withExists([
+                    'likes as liked_by_me' => function ($likeQuery) use ($currentUserId) {
+                        $likeQuery->where('user_id', $currentUserId);
+                    },
+                ]);
+            })
             ->latest()
             ->paginate(10);
 
@@ -27,7 +37,7 @@ class CommentController extends Controller
 
     public function store(Request $request, $postId)
     {
-        $post = Post::where('is_published', true)->findOrFail($postId);
+        $post = Post::with('user')->where('is_published', true)->findOrFail($postId);
 
         $validated = $request->validate([
             'content' => ['required', 'string', 'max:1000'],
@@ -39,9 +49,18 @@ class CommentController extends Controller
             'content' => $validated['content'],
         ]);
 
+        if ($post->user_id !== $request->user()->id) {
+            $actor = $request->user()->loadMissing('profile');
+            $post->user->notify(new PostCommentedNotification($actor, $post, $comment));
+        }
+
+        $comment->load(['user.profile']);
+        $comment->loadCount('likes');
+        $comment->setAttribute('liked_by_me', false);
+
         return response()->json([
             'message' => 'Comentario creado correctamente',
-            'data' => new CommentResource($comment->load(['user.profile'])),
+            'data' => new CommentResource($comment),
         ], 201);
     }
 

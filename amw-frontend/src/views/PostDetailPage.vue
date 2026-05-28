@@ -281,6 +281,24 @@
                     <p class="text-sm text-stone-600 leading-relaxed mt-1 break-words">
                       {{ comment.content }}
                     </p>
+
+                    <button
+                      type="button"
+                      class="mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[11px] font-manrope transition-colors disabled:opacity-45"
+                      :class="comment.liked_by_me ? 'text-primary bg-primary/10' : 'text-stone-400 hover:text-primary hover:bg-primary/10'"
+                      :disabled="isUpdatingCommentLike(comment.id)"
+                      :aria-label="comment.liked_by_me ? 'Quitar me gusta del comentario' : 'Dar me gusta al comentario'"
+                      @click="toggleCommentLike(comment)"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[16px]"
+                        :class="comment.liked_by_me ? 'liked-icon' : ''"
+                        aria-hidden="true"
+                      >
+                        favorite
+                      </span>
+                      <span>{{ comment.likes_count || 0 }}</span>
+                    </button>
                   </div>
                 </article>
               </div>
@@ -346,6 +364,8 @@ import {
   createComment,
   likePost,
   unlikePost,
+  likeComment,
+  unlikeComment,
 } from '@/services/postService'
 
 export default {
@@ -358,6 +378,7 @@ export default {
       loading: true,
       commentsLoading: false,
       updatingLike: false,
+      updatingCommentLikes: [],
       sendingComment: false,
       likedByMe: false,
       newComment: '',
@@ -441,6 +462,32 @@ export default {
         this.commentError = this.$t('postDetail.errors.like')
       } finally {
         this.updatingLike = false
+      }
+    },
+
+    isUpdatingCommentLike(commentId) {
+      return this.updatingCommentLikes.includes(commentId)
+    },
+
+    async toggleCommentLike(comment) {
+      if (this.isUpdatingCommentLike(comment.id)) {
+        return
+      }
+
+      this.updatingCommentLikes.push(comment.id)
+      this.commentError = ''
+
+      try {
+        const updatedComment = comment.liked_by_me
+          ? await unlikeComment(comment.id)
+          : await likeComment(comment.id)
+
+        comment.likes_count = updatedComment.likes_count
+        comment.liked_by_me = updatedComment.liked_by_me
+      } catch (error) {
+        this.commentError = 'No se pudo actualizar el me gusta del comentario.'
+      } finally {
+        this.updatingCommentLikes = this.updatingCommentLikes.filter((id) => id !== comment.id)
       }
     },
 

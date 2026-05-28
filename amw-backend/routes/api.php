@@ -4,10 +4,12 @@ use App\Http\Controllers\Api\ArtistController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\CommentLikeController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\FollowController;
 use App\Http\Controllers\Api\LikeController;
 use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\UploadController;
@@ -91,6 +93,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/posts/{id}/comments', [CommentController::class, 'store']);
     Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+    Route::post('/comments/{comment}/like', [CommentLikeController::class, 'store']);
+    Route::delete('/comments/{comment}/like', [CommentLikeController::class, 'destroy']);
+
+    /*
+    Notificaciones
+    */
+
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/summary', [NotificationController::class, 'summary']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead']);
 
     /*
         Mensajes

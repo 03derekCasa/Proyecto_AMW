@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Notifications\NewMessageNotification;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
@@ -17,6 +18,18 @@ class MessageController extends Controller
         $conversation->users()->updateExistingPivot($request->user()->id, [
             'last_read_at' => now(),
         ]);
+
+        /*
+         * Al abrir la conversación se consideran leídas también las
+         * notificaciones de mensaje asociadas a esa conversación.
+         */
+        $request->user()->unreadNotifications
+            ->filter(function ($notification) use ($conversation) {
+                return ($notification->data['type'] ?? null) === 'new_message'
+                    && (int) ($notification->data['conversation_id'] ?? 0) === $conversation->id;
+            })
+            ->each
+            ->markAsRead();
 
         $messages = $conversation->messages()
             ->with(['sender.profile'])
@@ -46,6 +59,15 @@ class MessageController extends Controller
         ]);
 
         $conversation->touch();
+
+        $actor = $request->user()->loadMissing('profile');
+        $recipients = $conversation->users()
+            ->where('users.id', '!=', $actor->id)
+            ->get();
+
+        foreach ($recipients as $recipient) {
+            $recipient->notify(new NewMessageNotification($actor, $conversation, $message));
+        }
 
         $message->load(['sender.profile']);
 

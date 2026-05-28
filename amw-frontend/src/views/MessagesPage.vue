@@ -711,6 +711,10 @@ export default {
 
         this.messages = payload.data || payload
 
+        // La lectura se registra en backend al cargar la conversación.
+        // Avisamos al sidebar para retirar el punto de mensajes pendientes.
+        window.dispatchEvent(new CustomEvent('amw-messages-read'))
+
         await this.$nextTick()
         this.scrollToBottom()
       } catch (error) {

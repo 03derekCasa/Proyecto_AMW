@@ -121,10 +121,16 @@
         >
           <span v-if="isActive('/messages')" class="sidebar-active-line" aria-hidden="true"></span>
 
-          <span class="sidebar-icon-slot">
+          <span class="sidebar-icon-slot sidebar-message-icon-slot">
             <span
               :style="{ '--sidebar-icon-image': `url(${icons.mensajes})` }"
               class="sidebar-nav-icon sidebar-nav-icon--mensajes"
+              aria-hidden="true"
+            ></span>
+
+            <span
+              v-if="unreadMessageCount > 0"
+              class="sidebar-message-dot"
               aria-hidden="true"
             ></span>
           </span>
@@ -220,6 +226,7 @@
 
 <script>
 import api from '@/services/api'
+import { getNotificationSummary } from '@/services/notificationService'
 import CreatePostModal from '@/components/CreatePostModal.vue'
 import explorarIcon from '@/assets/Explorar.svg'
 import perfilIcon from '@/assets/Perfil.svg'
@@ -246,6 +253,8 @@ export default {
       userUsername: '',
       userProfileImage: 'https://placehold.co/400x500?text=AMW',
       showCreatePostModal: false,
+      unreadMessageCount: 0,
+      notificationInterval: null,
     }
   },
 
@@ -261,9 +270,35 @@ export default {
 
   mounted() {
     this.loadSidebarProfile()
+    this.loadNotificationSummary()
+
+    this.notificationInterval = window.setInterval(() => {
+      this.loadNotificationSummary()
+    }, 30000)
+
+    window.addEventListener('amw-messages-read', this.loadNotificationSummary)
+  },
+
+  beforeUnmount() {
+    window.clearInterval(this.notificationInterval)
+    window.removeEventListener('amw-messages-read', this.loadNotificationSummary)
   },
 
   methods: {
+    async loadNotificationSummary() {
+      if (!localStorage.getItem('amw_token')) {
+        this.unreadMessageCount = 0
+        return
+      }
+
+      try {
+        const summary = await getNotificationSummary()
+        this.unreadMessageCount = Number(summary.unread_messages_count || 0)
+      } catch (error) {
+        this.unreadMessageCount = 0
+      }
+    },
+
     handlePostCreated(post) {
       window.dispatchEvent(new CustomEvent('amw-post-created', { detail: post }))
     },
@@ -463,6 +498,21 @@ export default {
 .sidebar-nav-icon--mensajes {
   width: 22px;
   height: 22px;
+}
+
+.sidebar-message-icon-slot {
+  position: relative;
+}
+
+.sidebar-message-dot {
+  position: absolute;
+  top: 11px;
+  right: 14px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #faf9f6;
+  border-radius: 9999px;
+  background-color: #ff00ff;
 }
 
 /*

@@ -174,3 +174,13 @@ export async function deleteComment(commentId) {
     const response = await api.delete(`/comments/${commentId}`)
     return response.data
 }
+
+export async function likeComment(commentId) {
+    const response = await api.post(`/comments/${commentId}/like`)
+    return response.data?.data || response.data
+}
+
+export async function unlikeComment(commentId) {
+    const response = await api.delete(`/comments/${commentId}/like`)
+    return response.data?.data || response.data
+}

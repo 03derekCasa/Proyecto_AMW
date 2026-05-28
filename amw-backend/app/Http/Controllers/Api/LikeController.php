@@ -6,18 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
 use App\Models\Like;
 use App\Models\Post;
+use App\Notifications\PostLikedNotification;
 use Illuminate\Http\Request;
 
 class LikeController extends Controller
 {
     public function store(Request $request, $id)
     {
-        $post = Post::findOrFail($id);
+        $post = Post::with('user')->findOrFail($id);
 
         $like = Like::firstOrCreate([
             'user_id' => $request->user()->id,
             'post_id' => $post->id,
         ]);
+
+        if ($like->wasRecentlyCreated && $post->user_id !== $request->user()->id) {
+            $actor = $request->user()->loadMissing('profile');
+            $post->user->notify(new PostLikedNotification($actor, $post));
+        }
 
         $post->load(['user.profile', 'category']);
         $post->loadCount('likes');

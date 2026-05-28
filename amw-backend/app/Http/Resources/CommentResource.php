@@ -22,6 +22,9 @@ class CommentResource extends JsonResource
                 ];
             }),
 
+            'likes_count' => (int) ($this->likes_count ?? 0),
+            'liked_by_me' => (bool) ($this->liked_by_me ?? false),
+
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),
         ];
