@@ -1,7 +1,7 @@
 <template>
   <div
       v-if="modelValue"
-      class="fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4 sm:px-6"
+      class="fixed inset-0 z-[300] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4 py-4 sm:px-6 sm:py-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="create-post-title"
@@ -17,9 +17,9 @@
     </button>
 
     <section
-        class="w-[min(900px,92vw)] max-h-[82vh] bg-[#FAF9F6] rounded-2xl overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr]"
+        class="create-post-panel w-[min(900px,92vw)] bg-[#FAF9F6] rounded-2xl shadow-2xl grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr]"
     >
-      <div class="bg-stone-100 h-[300px] lg:h-[500px] flex items-center justify-center relative overflow-hidden">
+      <div class="create-post-media bg-stone-100 flex items-center justify-center relative overflow-hidden">
         <label
             for="post-image"
             class="w-full h-full flex items-center justify-center cursor-pointer group"
@@ -75,8 +75,8 @@
         </button>
       </div>
 
-      <form class="flex flex-col h-[460px] lg:h-[500px]" @submit.prevent="submitPost">
-        <header class="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+      <form class="create-post-form flex flex-col min-h-0" @submit.prevent="submitPost">
+        <header class="shrink-0 px-6 py-4 border-b border-stone-200 flex items-center justify-between">
           <h1 id="create-post-title" class="font-manrope text-lg font-extrabold tracking-tight">
             {{ $t('postModal.create') }}
           </h1>
@@ -90,7 +90,7 @@
           </button>
         </header>
 
-        <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4 custom-scrollbar">
+        <div class="min-h-0 flex-1 overflow-y-auto px-6 pt-5 pb-8 space-y-4 custom-scrollbar">
           <div>
             <label
                 for="post-title"
@@ -292,29 +292,6 @@
             </div>
           </div>
 
-          <label
-              for="post-is-published"
-              class="flex items-center justify-between gap-4 p-4 bg-white rounded-xl border border-stone-200 cursor-pointer"
-          >
-            <div>
-              <p class="font-manrope text-sm font-bold">
-                {{ $t('postModal.publishNow') }}
-              </p>
-
-              <p class="font-manrope text-xs text-stone-500">
-                {{ $t('postModal.publishHelp') }}
-              </p>
-            </div>
-
-            <input
-                id="post-is-published"
-                name="is_published"
-                v-model="form.is_published"
-                type="checkbox"
-                class="rounded border-stone-300 text-primary focus:ring-primary shrink-0"
-            />
-          </label>
-
           <p
               v-if="errorMessage"
               class="text-red-700 bg-red-50 border border-red-200 px-4 py-3 text-sm rounded-xl"
@@ -366,7 +343,6 @@ export default {
         category_id: null,
         technique: '',
         creation_year: '',
-        is_published: true,
       },
     }
   },
@@ -431,7 +407,6 @@ export default {
         category_id: null,
         technique: '',
         creation_year: '',
-        is_published: true,
       }
 
       if (this.$refs.fileInput) {
@@ -525,15 +500,16 @@ export default {
       this.loading = true
 
       try {
-        const imageUrl = await uploadPostImage(this.selectedFile)
+        const uploadedImage = await uploadPostImage(this.selectedFile)
 
         const postPayload = {
           title: this.form.title.trim(),
           description: this.buildDescription(),
-          image_url: imageUrl,
+          image_url: uploadedImage.url,
+          image_public_id: uploadedImage.publicId,
           type: this.form.type,
           category_id: this.form.category_id,
-          is_published: this.form.is_published,
+          is_published: true,
           hashtags: this.form.hashtags,
         }
 
@@ -545,8 +521,9 @@ export default {
          */
         this.$emit('created', post)
 
-        this.resetForm()
+        // Cierra el modal justo después de crear correctamente la publicación.
         this.$emit('update:modelValue', false)
+        this.resetForm()
       } catch (error) {
         this.errorMessage = this.$t('postModal.errors.create')
       } finally {
@@ -586,6 +563,46 @@ export default {
 <style scoped>
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/*
+ * En móvil el panel completo puede desplazarse.
+ * En escritorio, la ventana queda limitada al viewport y solo se desplazan
+ * los campos del formulario derecho, por lo que siempre se alcanza el final.
+ */
+.create-post-panel {
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+}
+
+.create-post-media {
+  height: 270px;
+  min-height: 270px;
+}
+
+.create-post-form {
+  min-height: 500px;
+}
+
+@media (min-width: 1024px) {
+  .create-post-panel {
+    height: min(680px, calc(100vh - 3rem));
+    height: min(680px, calc(100dvh - 3rem));
+    max-height: none;
+    overflow: hidden;
+  }
+
+  .create-post-media {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .create-post-form {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
 }
 
 .custom-scrollbar::-webkit-scrollbar {

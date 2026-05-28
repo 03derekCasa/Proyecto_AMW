@@ -409,24 +409,44 @@
                 :key="artwork.id"
                 class="space-y-6"
             >
-              <button
-                  type="button"
-                  class="block w-full bg-surface-container aspect-[3/4] relative overflow-hidden rounded-2xl group"
-                  :aria-label="`${ui.viewArtwork}: ${artwork.title}`"
-                  @click="goToPost(artwork.id)"
-              >
-                <img
-                    class="w-full h-full object-cover rounded-2xl transition-transform duration-700 cursor-pointer group-hover:scale-105"
-                    :src="artwork.image"
-                    :alt="artwork.title"
-                />
+              <div class="artwork-card relative">
+                <button
+                    type="button"
+                    class="block w-full bg-surface-container aspect-[3/4] relative overflow-hidden rounded-2xl group"
+                    :aria-label="`${ui.viewArtwork}: ${artwork.title}`"
+                    @click="goToPost(artwork.id)"
+                >
+                  <img
+                      class="w-full h-full object-cover rounded-2xl transition-transform duration-700 cursor-pointer group-hover:scale-105"
+                      :src="artwork.image"
+                      :alt="artwork.title"
+                  />
 
-                <div class="absolute inset-0 rounded-2xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white rounded-full px-4 py-2">
-                    {{ ui.viewArtwork }}
+                  <div class="absolute inset-0 rounded-2xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white rounded-full px-4 py-2">
+                      {{ ui.viewArtwork }}
+                    </span>
+                  </div>
+                </button>
+
+                <button
+                    type="button"
+                    class="artwork-delete-button"
+                    :class="{ 'is-deleting': deletingArtworkId === artwork.id }"
+                    :disabled="deletingArtworkId === artwork.id"
+                    :aria-label="`${ui.deleteArtwork}: ${artwork.title}`"
+                    :title="ui.deleteArtwork"
+                    @click.stop="openDeleteConfirmation(artwork)"
+                >
+                  <span
+                      class="material-symbols-outlined"
+                      :class="{ 'animate-spin': deletingArtworkId === artwork.id }"
+                      aria-hidden="true"
+                  >
+                    {{ deletingArtworkId === artwork.id ? 'progress_activity' : 'delete' }}
                   </span>
-                </div>
-              </button>
+                </button>
+              </div>
 
               <div class="flex justify-between items-baseline">
                 <h3 class="font-notoSerif text-xl italic">
@@ -488,6 +508,58 @@
         :image-src="coverOriginalPreviewUrl"
         @cropped="handleCroppedCover"
     />
+
+    <!-- Confirmación de eliminación de obra -->
+    <transition name="delete-confirm-fade">
+      <div
+          v-if="artworkToDelete"
+          class="delete-confirm-overlay"
+          @click.self="closeDeleteConfirmation"
+      >
+        <section
+            class="delete-confirm-modal"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-artwork-title"
+            aria-describedby="delete-artwork-description"
+        >
+          <h2 id="delete-artwork-title" class="delete-confirm-modal__title">
+            {{ ui.deleteModalTitle }}
+          </h2>
+
+          <p id="delete-artwork-description" class="delete-confirm-modal__text">
+            {{ ui.deleteArtworkConfirm.replace('{title}', artworkToDelete.title) }}
+          </p>
+
+          <div class="delete-confirm-modal__actions">
+            <button
+                type="button"
+                class="delete-confirm-button delete-confirm-button--cancel"
+                :disabled="deletingArtworkId !== null"
+                @click="closeDeleteConfirmation"
+            >
+              {{ ui.cancel }}
+            </button>
+
+            <button
+                type="button"
+                class="delete-confirm-button delete-confirm-button--danger"
+                :disabled="deletingArtworkId !== null"
+                @click="confirmDeleteArtwork"
+            >
+              <span
+                  v-if="deletingArtworkId !== null"
+                  class="material-symbols-outlined animate-spin delete-confirm-button__loader"
+                  aria-hidden="true"
+              >
+                progress_activity
+              </span>
+              {{ deletingArtworkId !== null ? ui.deletingArtwork : ui.confirmDeleteArtwork }}
+            </button>
+          </div>
+        </section>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -499,7 +571,7 @@ import {
   uploadCoverImage,
 } from '@/services/profileService'
 
-import { getMyPosts } from '@/services/postService'
+import { getMyPosts, deletePost } from '@/services/postService'
 import { logoutUser } from '@/services/authService'
 import CoverImageCropModal from '@/components/CoverImageCropModal.vue'
 
@@ -538,6 +610,13 @@ const profileTexts = {
     emptyWorksTitle: 'Todavía no tienes obras publicadas.',
     emptyWorksText: 'Cuando crees publicaciones en AMW, aparecerán aquí como parte de tu portfolio.',
     viewArtwork: 'Ver obra',
+    deleteArtwork: 'Eliminar obra',
+    deleteModalTitle: 'Eliminar obra',
+    confirmDeleteArtwork: 'Eliminar',
+    deletingArtwork: 'Eliminando obra...',
+    deleteArtworkConfirm: '¿Seguro que quieres eliminar "{title}"? La obra y su imagen se eliminarán definitivamente.',
+    artworkDeleted: 'Obra eliminada correctamente.',
+    artworkDeleteError: 'No se pudo eliminar la obra.',
     viewFullPortfolio: 'Ver más publicaciones',
     artwork: 'Obra',
     footerLabel: 'Pie de página de AMW',
@@ -590,6 +669,13 @@ const profileTexts = {
     emptyWorksTitle: 'You do not have published artworks yet.',
     emptyWorksText: 'When you create publications on AMW, they will appear here as part of your portfolio.',
     viewArtwork: 'View artwork',
+    deleteArtwork: 'Delete artwork',
+    deleteModalTitle: 'Delete artwork',
+    confirmDeleteArtwork: 'Delete',
+    deletingArtwork: 'Deleting artwork...',
+    deleteArtworkConfirm: 'Are you sure you want to delete "{title}"? The artwork and its image will be permanently deleted.',
+    artworkDeleted: 'Artwork deleted successfully.',
+    artworkDeleteError: 'The artwork could not be deleted.',
     viewFullPortfolio: 'View more publications',
     artwork: 'Artwork',
     footerLabel: 'AMW footer',
@@ -642,6 +728,13 @@ const profileTexts = {
     emptyWorksTitle: 'Vous n’avez pas encore publié d’œuvres.',
     emptyWorksText: 'Lorsque vous créerez des publications sur AMW, elles apparaîtront ici dans votre portfolio.',
     viewArtwork: 'Voir l’œuvre',
+    deleteArtwork: 'Supprimer l’œuvre',
+    deleteModalTitle: 'Supprimer l’œuvre',
+    confirmDeleteArtwork: 'Supprimer',
+    deletingArtwork: 'Suppression en cours...',
+    deleteArtworkConfirm: 'Voulez-vous vraiment supprimer "{title}" ? L’œuvre et son image seront définitivement supprimées.',
+    artworkDeleted: 'Œuvre supprimée correctement.',
+    artworkDeleteError: 'L’œuvre n’a pas pu être supprimée.',
     viewFullPortfolio: 'Voir plus de publications',
     artwork: 'Œuvre',
     footerLabel: 'Pied de page AMW',
@@ -710,6 +803,8 @@ export default {
       profileSnapshot: null,
 
       artworks: [],
+      deletingArtworkId: null,
+      artworkToDelete: null,
     }
   },
 
@@ -754,6 +849,54 @@ export default {
 
     goToPost(postId) {
       this.$router.push(`/posts/${postId}`)
+    },
+
+    openDeleteConfirmation(artwork) {
+      if (this.deletingArtworkId !== null) {
+        return
+      }
+
+      this.artworkToDelete = artwork
+    },
+
+    closeDeleteConfirmation() {
+      if (this.deletingArtworkId !== null) {
+        return
+      }
+
+      this.artworkToDelete = null
+    },
+
+    async confirmDeleteArtwork() {
+      const artwork = this.artworkToDelete
+
+      if (!artwork || this.deletingArtworkId !== null) {
+        return
+      }
+
+      this.deletingArtworkId = artwork.id
+      this.successMessage = ''
+      this.errorMessage = ''
+
+      try {
+        await deletePost(artwork.id)
+
+        this.artworks = this.artworks.filter((item) => item.id !== artwork.id)
+        this.userWorksCount = this.artworks.length
+        this.successMessage = this.ui.artworkDeleted
+      } catch (error) {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('amw_token')
+          localStorage.removeItem('amw_user')
+          this.$router.push('/login')
+          return
+        }
+
+        this.errorMessage = error.response?.data?.message || this.ui.artworkDeleteError
+      } finally {
+        this.deletingArtworkId = null
+        this.artworkToDelete = null
+      }
     },
 
     toggleEditForm() {
@@ -1036,6 +1179,149 @@ export default {
 
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.artwork-delete-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 9999px;
+  background: rgba(28, 25, 23, 0.64);
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.artwork-delete-button:hover,
+.artwork-delete-button:focus-visible {
+  background: #dc2626;
+  outline: none;
+}
+
+.artwork-delete-button.is-deleting,
+.artwork-delete-button:disabled {
+  opacity: 1;
+  cursor: wait;
+  background: rgba(120, 113, 108, 0.8);
+}
+
+@media (hover: hover) {
+  .artwork-delete-button {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+  }
+
+  .artwork-card:hover .artwork-delete-button,
+  .artwork-delete-button:focus-visible,
+  .artwork-delete-button.is-deleting {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.delete-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(20, 18, 18, 0.24);
+  backdrop-filter: blur(1.5px);
+}
+
+.delete-confirm-modal {
+  width: min(390px, 100%);
+  padding: 1.65rem;
+  border: 1px solid rgba(120, 113, 108, 0.15);
+  border-radius: 1.25rem;
+  background: #faf9f6;
+  box-shadow: 0 18px 48px rgba(28, 25, 23, 0.16);
+}
+
+.delete-confirm-modal__title {
+  margin: 0 0 0.65rem;
+  color: #292524;
+  font-family: inherit;
+  font-size: 1.13rem;
+  font-weight: 700;
+}
+
+.delete-confirm-modal__text {
+  margin: 0;
+  color: #78716c;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.delete-confirm-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  margin-top: 1.5rem;
+}
+
+.delete-confirm-button {
+  min-height: 2.5rem;
+  padding: 0.65rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.delete-confirm-button--cancel {
+  border-color: rgba(120, 113, 108, 0.2);
+  background: transparent;
+  color: #57534e;
+}
+
+.delete-confirm-button--cancel:hover:not(:disabled) {
+  background: #f0eeeb;
+}
+
+.delete-confirm-button--danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #a900a9;
+  color: #ffffff;
+}
+
+.delete-confirm-button--danger:hover:not(:disabled) {
+  background: #8c008c;
+}
+
+.delete-confirm-button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.delete-confirm-button__loader {
+  font-size: 1rem;
+}
+
+.delete-confirm-fade-enter-active,
+.delete-confirm-fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.delete-confirm-fade-enter-from,
+.delete-confirm-fade-leave-to {
+  opacity: 0;
 }
 
 .profile-footer {

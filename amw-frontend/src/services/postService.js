@@ -102,11 +102,20 @@ export async function uploadPostImage(file) {
         payload?.image_url ||
         payload?.url
 
-    if (!imageUrl) {
-        throw new Error('No se recibió la URL de la imagen subida.')
+    const imagePublicId =
+        payload?.data?.public_id ||
+        payload?.data?.path ||
+        payload?.public_id ||
+        payload?.path
+
+    if (!imageUrl || !imagePublicId) {
+        throw new Error('No se recibieron correctamente los datos de la imagen subida.')
     }
 
-    return imageUrl
+    return {
+        url: imageUrl,
+        publicId: imagePublicId,
+    }
 }
 
 export async function createPost(postData) {

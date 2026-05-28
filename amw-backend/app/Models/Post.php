@@ -20,6 +20,7 @@ class Post extends Model
         'description',
         'hashtags',
         'image_url',
+        'image_public_id',
         'type',
         'is_published',
     ];

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -42,6 +43,7 @@ class PostController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string', 'max:2048'],
+            'image_public_id' => ['nullable', 'string', 'max:255'],
             'type' => ['required', 'string', 'in:obra,evento,producto'],
             'is_published' => ['boolean'],
             'hashtags' => ['nullable', 'array', 'max:10'],
@@ -54,6 +56,7 @@ class PostController extends Controller
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'image_url' => $validated['image_url'] ?? null,
+            'image_public_id' => $validated['image_public_id'] ?? null,
             'type' => $validated['type'],
             'is_published' => $validated['is_published'] ?? true,
             'hashtags' => $validated['hashtags'] ?? [],
@@ -101,7 +104,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, CloudinaryService $cloudinaryService)
     {
         $post = Post::where('user_id', $request->user()->id)->findOrFail($id);
 
@@ -112,9 +115,22 @@ class PostController extends Controller
             'hashtags' => ['nullable', 'array', 'max:10'],
             'hashtags.*' => ['string', 'max:40'],
             'image_url' => ['nullable', 'string', 'max:2048'],
+            'image_public_id' => ['nullable', 'string', 'max:255'],
             'type' => ['sometimes', 'required', 'in:obra,evento,producto'],
             'is_published' => ['nullable', 'boolean'],
         ]);
+
+        /*
+         * Si en el futuro se edita la imagen del post, se elimina la imagen
+         * anterior de Cloudinary antes de guardar la nueva referencia.
+         */
+        if (
+            array_key_exists('image_public_id', $validated)
+            && $post->image_public_id
+            && $validated['image_public_id'] !== $post->image_public_id
+        ) {
+            $cloudinaryService->deleteImage($post->image_public_id);
+        }
 
         $post->update($validated);
 
@@ -127,14 +143,22 @@ class PostController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, $id, CloudinaryService $cloudinaryService)
     {
         $post = Post::where('user_id', $request->user()->id)->findOrFail($id);
+
+        /*
+         * Primero se elimina el recurso multimedia asociado.
+         * invalidate=true, dentro del servicio, solicita limpiar la copia CDN.
+         */
+        if ($post->image_public_id) {
+            $cloudinaryService->deleteImage($post->image_public_id);
+        }
 
         $post->delete();
 
         return response()->json([
-            'message' => 'Publicación eliminada correctamente',
+            'message' => 'Publicación e imagen eliminadas correctamente',
         ]);
     }
 }
