@@ -57,7 +57,7 @@
                 {{ userName }}
               </h1>
 
-              <p class="font-manrope text-sm text-primary font-medium mb-2">
+              <p class="profile-username font-manrope text-sm text-primary mb-2">
                 {{ formattedUsername }}
               </p>
 
@@ -70,7 +70,7 @@
                   <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
                     {{ ui.works }}
                   </span>
-                  <span class="font-notoSerif text-2xl">
+                  <span class="profile-stat-number font-notoSerif text-2xl">
                     {{ userWorksCount }}
                   </span>
                 </div>
@@ -79,7 +79,7 @@
                   <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
                     {{ ui.followers }}
                   </span>
-                  <span class="font-notoSerif text-2xl">
+                  <span class="profile-stat-number font-notoSerif text-2xl">
                     {{ userFollowers }}
                   </span>
                 </div>
@@ -88,7 +88,7 @@
                   <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
                     {{ ui.following }}
                   </span>
-                  <span class="font-notoSerif text-2xl">
+                  <span class="profile-stat-number font-notoSerif text-2xl">
                     {{ userFollowing }}
                   </span>
                 </div>
@@ -131,14 +131,32 @@
             </div>
 
             <div class="mt-12 space-y-8">
-              <button
-                  class="w-full py-4 px-12 rounded-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10 disabled:opacity-60"
-                  type="button"
-                  :disabled="startingConversation"
-                  @click="startConversation"
-              >
-                {{ startingConversation ? ui.openingChat : ui.sendMessage }}
-              </button>
+              <div class="space-y-3">
+                <button
+                    v-if="!isOwnProfile"
+                    class="w-full py-4 px-12 rounded-full border font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-all disabled:opacity-60"
+                    :class="isFollowing
+                      ? 'border-primary bg-white text-primary'
+                      : 'border-primary bg-primary text-white'"
+                    type="button"
+                    :disabled="togglingFollow"
+                    :aria-pressed="isFollowing"
+                    @click="toggleFollow"
+                >
+                  {{ togglingFollow
+                    ? ui.updatingFollow
+                    : (isFollowing ? ui.followingAction : ui.followAction) }}
+                </button>
+
+                <button
+                    class="w-full py-4 px-12 rounded-full bg-gradient-to-r from-primary to-primary-container text-on-primary font-manrope font-bold uppercase tracking-widest text-xs hover:scale-[1.02] transition-transform shadow-lg shadow-primary/10 disabled:opacity-60"
+                    type="button"
+                    :disabled="startingConversation"
+                    @click="startConversation"
+                >
+                  {{ startingConversation ? ui.openingChat : ui.sendMessage }}
+                </button>
+              </div>
 
               <div class="flex gap-4">
                 <a
@@ -274,6 +292,7 @@
 import api from '@/services/api'
 import AppSidebar from '@/components/AppSidebar.vue'
 import { logoutUser } from '@/services/authService'
+import { followUser, unfollowUser } from '@/services/followService'
 
 const publicProfileTexts = {
   es: {
@@ -288,6 +307,12 @@ const publicProfileTexts = {
     emptyBiography: 'Este artista todavía no ha añadido una biografía pública.',
     openingChat: 'Abriendo chat...',
     sendMessage: 'Enviar mensaje',
+    followAction: 'Seguir',
+    followingAction: 'Siguiendo',
+    updatingFollow: 'Actualizando...',
+    followedSuccess: 'Ahora sigues a este artista.',
+    unfollowedSuccess: 'Has dejado de seguir a este artista.',
+    followError: 'No se pudo actualizar el seguimiento.',
     openWebsite: 'Abrir página web del artista',
     openInstagram: 'Abrir Instagram del artista',
     openBehance: 'Abrir Behance del artista',
@@ -324,6 +349,12 @@ const publicProfileTexts = {
     emptyBiography: 'This artist has not added a public biography yet.',
     openingChat: 'Opening chat...',
     sendMessage: 'Send message',
+    followAction: 'Follow',
+    followingAction: 'Following',
+    updatingFollow: 'Updating...',
+    followedSuccess: 'You are now following this artist.',
+    unfollowedSuccess: 'You are no longer following this artist.',
+    followError: 'The follow status could not be updated.',
     openWebsite: "Open the artist's website",
     openInstagram: "Open the artist's Instagram",
     openBehance: "Open the artist's Behance",
@@ -360,6 +391,12 @@ const publicProfileTexts = {
     emptyBiography: "Cet artiste n'a pas encore ajouté de biographie publique.",
     openingChat: 'Ouverture du chat...',
     sendMessage: 'Envoyer un message',
+    followAction: 'Suivre',
+    followingAction: 'Abonné',
+    updatingFollow: 'Mise à jour...',
+    followedSuccess: 'Vous suivez maintenant cet artiste.',
+    unfollowedSuccess: 'Vous ne suivez plus cet artiste.',
+    followError: "L'abonnement n'a pas pu être mis à jour.",
     openWebsite: "Ouvrir le site de l'artiste",
     openInstagram: "Ouvrir l'Instagram de l'artiste",
     openBehance: "Ouvrir le Behance de l'artiste",
@@ -397,6 +434,9 @@ export default {
     return {
       loading: false,
       startingConversation: false,
+      togglingFollow: false,
+      isFollowing: false,
+      isOwnProfile: true,
       errorMessage: '',
       actionErrorMessage: '',
       successMessage: '',
@@ -493,9 +533,11 @@ export default {
             this.profile.profile_image_url ||
             this.userProfileImage
 
-        this.userWorksCount = data.stats?.works_count || 0
-        this.userFollowers = data.stats?.followers || '0'
-        this.userFollowing = data.stats?.following || 0
+        this.userWorksCount = data.stats?.works_count ?? 0
+        this.userFollowers = data.stats?.followers ?? 0
+        this.userFollowing = data.stats?.following ?? 0
+        this.isFollowing = Boolean(data.is_following)
+        this.isOwnProfile = Boolean(data.is_own_profile)
 
         this.artworks = (data.posts || []).map((post) => ({
           id: post.id,
@@ -518,6 +560,36 @@ export default {
         }
       } finally {
         this.loading = false
+      }
+    },
+
+    async toggleFollow() {
+      if (!this.user?.id || this.togglingFollow || this.isOwnProfile) {
+        return
+      }
+
+      this.togglingFollow = true
+      this.actionErrorMessage = ''
+      this.successMessage = ''
+
+      try {
+        const result = this.isFollowing
+          ? await unfollowUser(this.user.id)
+          : await followUser(this.user.id)
+
+        this.isFollowing = Boolean(result.is_following)
+        this.userFollowers = result.followers_count ?? this.userFollowers
+        this.userFollowing = result.following_count ?? this.userFollowing
+
+        this.successMessage = this.isFollowing
+          ? this.ui.followedSuccess
+          : this.ui.unfollowedSuccess
+      } catch (error) {
+        this.actionErrorMessage =
+          error.response?.data?.message ||
+          this.ui.followError
+      } finally {
+        this.togglingFollow = false
       }
     },
 
@@ -565,7 +637,21 @@ export default {
 
 <style scoped>
 .profile-page {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --username-font-weight: 700;
+  --stat-number-font-weight: 700;
+
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+  "Roboto", "Helvetica Neue", Arial, sans-serif;
+}
+
+.profile-username {
+  font-weight: var(--username-font-weight);
+  letter-spacing: 0.01em;
+}
+
+.profile-stat-number {
+  font-weight: var(--stat-number-font-weight);
+  line-height: 1.1;
 }
 
 .profile-page .font-notoSerif,

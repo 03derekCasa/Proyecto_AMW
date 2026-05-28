@@ -2,17 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Profile;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Like;
-use App\Models\Post;
-use App\Models\Comment;
-use App\Models\Conversation;
-use App\Models\Message;
 
 class User extends Authenticatable
 {
@@ -43,35 +39,63 @@ class User extends Authenticatable
         return $this->hasOne(Profile::class);
     }
 
-    public function posts()
+    public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
     }
 
-    public function likes()
+    public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
     }
 
-    public function likedPosts()
+    public function likedPosts(): BelongsToMany
     {
         return $this->belongsToMany(Post::class, 'likes')->withTimestamps();
     }
 
-    public function comments()
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
 
-    public function conversations()
+    public function conversations(): BelongsToMany
     {
         return $this->belongsToMany(Conversation::class)
             ->withPivot('last_read_at')
             ->withTimestamps();
     }
 
-    public function sentMessages()
+    public function sentMessages(): HasMany
     {
         return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    /**
+     * Usuarios que siguen a este usuario.
+     *
+     */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'follows',
+            'followed_id',
+            'follower_id'
+        )->withTimestamps();
+    }
+
+    /**
+     * Usuarios a los que este usuario sigue.
+     *
+     */
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'follows',
+            'follower_id',
+            'followed_id'
+        )->withTimestamps();
     }
 }

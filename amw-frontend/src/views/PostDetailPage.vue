@@ -1,77 +1,90 @@
 <template>
-  <div class="min-h-screen bg-[#FAF9F6] text-[#1A1C1A]">
-    <AppTopBar @logout="handleLogout" />
+  <div class="post-detail-page min-h-screen bg-[#FAF9F6] text-[#1A1C1A]">
+    <!-- En esta vista se mantiene el sidebar -->
     <AppSidebar />
 
-    <main class="ml-20 pt-24 min-h-screen" aria-labelledby="post-detail-title">
+    <main class="post-detail-main ml-20 min-h-screen" aria-labelledby="post-detail-title">
       <!-- Cargando -->
       <div
-          v-if="loading"
-          class="min-h-[calc(100vh-6rem)] flex items-center justify-center font-manrope text-sm text-stone-500"
-          role="status"
+        v-if="loading"
+        class="min-h-screen flex items-center justify-center font-manrope text-sm text-stone-500"
+        role="status"
       >
         {{ $t('postDetail.loading') }}
       </div>
 
       <!-- Error -->
       <div
-          v-else-if="errorMessage"
-          class="max-w-2xl mx-auto mt-16 px-6 py-5 border border-red-200 bg-red-50 text-red-700 font-manrope text-sm"
-          role="alert"
+        v-else-if="errorMessage"
+        class="min-h-screen flex items-center justify-center px-6"
       >
-        <p>{{ errorMessage }}</p>
-
-        <router-link
-            to="/feed"
-            class="inline-block mt-4 text-primary font-bold uppercase tracking-widest text-[10px]"
+        <div
+          class="max-w-2xl w-full rounded-2xl px-6 py-5 border border-red-200 bg-red-50 text-red-700 font-manrope text-sm"
+          role="alert"
         >
-          {{ $t('postDetail.backToFeed') }}
-        </router-link>
+          <p>{{ errorMessage }}</p>
+
+          <router-link
+            to="/feed"
+            class="inline-flex items-center gap-2 mt-5 rounded-full bg-primary px-5 py-3 text-white font-bold uppercase tracking-widest text-[10px] hover:opacity-90 transition-opacity"
+          >
+            <span class="material-symbols-outlined text-base" aria-hidden="true">
+              arrow_back
+            </span>
+            {{ $t('postDetail.backToFeed') }}
+          </router-link>
+        </div>
       </div>
 
       <!-- Contenido del post -->
-      <div
-          v-else-if="post"
-          class="flex flex-col lg:flex-row min-h-[calc(100vh-6rem)]"
-      >
-        <!-- Imagen principal real del post -->
+      <div v-else-if="post" class="post-detail-layout">
+        <!--
+          Panel de imagen:
+        -->
         <section
-            class="w-full lg:w-[62%] min-h-[48vh] lg:min-h-[calc(100vh-6rem)] bg-[#F4F3F1] flex items-center justify-center p-6 lg:p-12"
-            :aria-label="$t('postDetail.artworkLabel')"
+          class="post-media-panel"
+          :aria-label="$t('postDetail.artworkLabel')"
         >
-          <div class="relative w-full h-full flex items-center justify-center">
+          <router-link
+            to="/feed"
+            class="post-back-button"
+            :aria-label="$t('postDetail.backToFeed')"
+          >
+            <span class="material-symbols-outlined text-xl" aria-hidden="true">
+              arrow_back
+            </span>
+            <span class="hidden sm:inline font-manrope text-[10px] font-bold uppercase tracking-widest">
+              {{ $t('postDetail.backToFeed') }}
+            </span>
+          </router-link>
+
+          <!--
+            Marco siempre 1:1:
+            object-contain conserva la obra completa.
+            El fondo negro rellena el espacio sobrante de imágenes verticales u horizontales.
+          -->
+          <div class="post-media-frame">
             <img
-                :src="post.image_url || fallbackPostImage"
-                :alt="post.title ? $t('postDetail.artworkAlt', { title: post.title }) : $t('postDetail.artworkLabel')"
-                class="max-w-full max-h-[calc(100vh-10rem)] object-contain shadow-2xl"
+              :src="post.image_url || fallbackPostImage"
+              :alt="post.title
+                ? $t('postDetail.artworkAlt', { title: post.title })
+                : $t('postDetail.artworkLabel')"
+              class="post-media-image"
             />
-
-            <div
-                v-if="post.id"
-                class="absolute bottom-4 left-4 lg:bottom-8 lg:left-8 bg-white/85 backdrop-blur-md px-5 py-3 border-l-4 border-primary"
-            >
-              <p class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-500">
-                {{ $t('postDetail.reference') }}
-              </p>
-
-              <p class="font-manrope text-sm font-bold text-stone-900">
-                AMW-POST-{{ post.id }}
-              </p>
-            </div>
           </div>
         </section>
 
-        <!-- Información y comentarios -->
+        <!-- Panel derecho: toda la información y comentarios desplazan juntos -->
         <aside
-            class="w-full lg:w-[38%] bg-[#FAF9F6] border-l border-stone-200 flex flex-col"
-            :aria-label="$t('postDetail.artworkLabel')"
+          class="post-info-panel custom-scrollbar"
+          :aria-label="$t('postDetail.artworkLabel')"
         >
-          <div class="flex-1 overflow-y-auto px-7 py-8 lg:px-10 lg:py-10 custom-scrollbar">
+          <div class="px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
             <!-- Título y autor -->
             <header class="space-y-6">
               <div class="flex flex-wrap items-center gap-3">
                 <span
-                    class="px-3 py-1 bg-primary/10 text-primary font-manrope text-[10px] uppercase tracking-widest font-bold"
+                  class="rounded-full px-4 py-1.5 bg-primary/10 text-primary font-manrope text-[10px] uppercase tracking-widest font-bold"
                 >
                   {{ post.category?.name || typeLabel(post.type) }}
                 </span>
@@ -82,70 +95,73 @@
               </div>
 
               <h1
-                  id="post-detail-title"
-                  class="font-notoSerif text-4xl lg:text-5xl leading-tight tracking-tight text-stone-900"
+                id="post-detail-title"
+                class="font-notoSerif text-4xl lg:text-5xl leading-tight tracking-tight text-stone-900"
               >
                 {{ post.title }}
               </h1>
 
               <!-- Perfil real del creador -->
               <router-link
-                  v-if="post.author?.id"
-                  :to="`/profiles/${post.author.id}`"
-                  class="inline-flex items-center gap-4 group"
-                  :aria-label="$t('postDetail.viewProfile')"
+                v-if="post.author?.id"
+                :to="`/profiles/${post.author.id}`"
+                class="inline-flex items-center gap-4 group"
+                :aria-label="$t('postDetail.viewProfile')"
               >
                 <div class="w-12 h-12 rounded-full overflow-hidden bg-stone-200 shrink-0">
                   <img
-                      :src="post.author.profile_image_url || fallbackAvatar"
-                      :alt="$t('postDetail.commentAvatar', { name: authorName })"
-                      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    :src="post.author.profile_image_url || fallbackAvatar"
+                    :alt="$t('postDetail.commentAvatar', { name: authorName })"
+                    class="w-full h-full object-cover rounded-full transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
 
-                <div class="flex flex-col">
-                  <span class="font-notoSerif text-lg text-stone-900 group-hover:text-primary transition-colors">
+                <div class="flex flex-col items-start">
+                  <span class="font-manrope text-lg font-bold text-stone-900 group-hover:text-primary transition-colors">
                     {{ authorName }}
                   </span>
 
-                  <span class="font-manrope text-xs text-stone-500">
+                  <span class="font-manrope text-xs font-bold text-primary">
+                    {{ authorUsername }}
+                  </span>
+
+                  <span
+                    class="inline-flex mt-2 rounded-full bg-primary/10 px-3 py-1 text-primary font-manrope text-[10px] font-bold uppercase tracking-widest"
+                  >
                     {{ $t('postDetail.viewPortfolio') }}
                   </span>
                 </div>
               </router-link>
 
-              <div
-                  v-else
-                  class="inline-flex items-center gap-4"
-              >
+              <div v-else class="inline-flex items-center gap-4">
                 <div class="w-12 h-12 rounded-full overflow-hidden bg-stone-200">
                   <img
-                      :src="fallbackAvatar"
-                      :alt="$t('postDetail.userAvatar')"
-                      class="w-full h-full object-cover"
+                    :src="fallbackAvatar"
+                    :alt="$t('postDetail.userAvatar')"
+                    class="w-full h-full object-cover rounded-full"
                   />
                 </div>
 
-                <span class="font-notoSerif text-lg">
+                <span class="font-manrope text-lg font-bold">
                   {{ $t('common.artist') }}
                 </span>
               </div>
             </header>
 
-            <!-- Likes -->
+            <!-- Likes y comentarios -->
             <section class="flex items-center justify-between py-6 my-8 border-y border-stone-200">
               <button
-                  type="button"
-                  class="flex items-center gap-2 hover:text-primary transition-colors disabled:opacity-50"
-                  :class="likedByMe ? 'text-primary' : 'text-stone-700'"
-                  :disabled="updatingLike"
-                  :aria-label="likedByMe ? $t('postDetail.unlike') : $t('postDetail.like')"
-                  @click="toggleLike"
+                type="button"
+                class="flex items-center gap-2 rounded-full px-4 py-2 hover:bg-primary/10 hover:text-primary transition-colors disabled:opacity-50"
+                :class="likedByMe ? 'text-primary bg-primary/10' : 'text-stone-700'"
+                :disabled="updatingLike"
+                :aria-label="likedByMe ? $t('postDetail.unlike') : $t('postDetail.like')"
+                @click="toggleLike"
               >
                 <span
-                    class="material-symbols-outlined"
-                    :class="likedByMe ? 'liked-icon' : ''"
-                    aria-hidden="true"
+                  class="material-symbols-outlined"
+                  :class="likedByMe ? 'liked-icon' : ''"
+                  aria-hidden="true"
                 >
                   favorite
                 </span>
@@ -163,30 +179,27 @@
             </section>
 
             <!-- Descripción -->
-            <section class="space-y-5 mb-10" aria-label="Descripción de la obra">
+            <section class="space-y-5 mb-10" :aria-label="$t('postDetail.artworkLabel')">
               <p
-                  v-if="post.description"
-                  class="font-manrope text-sm text-stone-700 leading-relaxed whitespace-pre-line"
+                v-if="post.description"
+                class="font-manrope text-sm text-stone-700 leading-relaxed whitespace-pre-line"
               >
                 {{ post.description }}
               </p>
 
-              <p
-                  v-else
-                  class="font-manrope text-sm text-stone-400 italic"
-              >
+              <p v-else class="font-manrope text-sm text-stone-400 italic">
                 {{ $t('postDetail.noDescription') }}
               </p>
 
               <div
-                  v-if="post.hashtags && post.hashtags.length > 0"
-                  class="flex flex-wrap gap-3 pt-2"
-                  :aria-label="$t('postModal.hashtags')"
+                v-if="post.hashtags && post.hashtags.length > 0"
+                class="flex flex-wrap gap-2 pt-2"
+                :aria-label="$t('postModal.hashtags')"
               >
                 <span
-                    v-for="tag in post.hashtags"
-                    :key="tag"
-                    class="text-primary font-manrope text-xs font-bold"
+                  v-for="tag in post.hashtags"
+                  :key="tag"
+                  class="rounded-full bg-primary/10 px-3 py-1 text-primary font-manrope text-xs font-bold"
                 >
                   #{{ tag }}
                 </span>
@@ -195,7 +208,7 @@
 
             <!-- Comentarios -->
             <section class="space-y-6 pt-4" aria-labelledby="comments-title">
-              <div class="flex items-baseline justify-between">
+              <div class="flex items-baseline justify-between gap-4">
                 <h2 id="comments-title" class="font-notoSerif text-xl text-stone-900">
                   {{ $t('postDetail.comments') }}
                 </h2>
@@ -206,55 +219,58 @@
               </div>
 
               <p
-                  v-if="commentsLoading"
-                  class="font-manrope text-sm text-stone-400"
-                  role="status"
+                v-if="commentsLoading"
+                class="font-manrope text-sm text-stone-400"
+                role="status"
               >
                 {{ $t('postDetail.loadingComments') }}
               </p>
 
               <p
-                  v-else-if="comments.length === 0"
-                  class="font-manrope text-sm text-stone-400 italic"
+                v-else-if="comments.length === 0"
+                class="rounded-2xl bg-stone-50 px-5 py-5 font-manrope text-sm text-stone-400 italic"
               >
                 {{ $t('postDetail.emptyComments') }}
               </p>
 
               <div v-else class="space-y-6">
-                <!-- Cada comentario usa la imagen del perfil guardada en backend -->
                 <article
-                    v-for="comment in comments"
-                    :key="comment.id"
-                    class="flex gap-4"
+                  v-for="comment in comments"
+                  :key="comment.id"
+                  class="flex gap-4"
                 >
                   <router-link
-                      v-if="comment.author?.id"
-                      :to="`/profiles/${comment.author.id}`"
-                      class="w-9 h-9 rounded-full overflow-hidden bg-stone-200 shrink-0"
-                      :aria-label="$t('postDetail.viewProfile')"
+                    v-if="comment.author?.id"
+                    :to="`/profiles/${comment.author.id}`"
+                    class="w-9 h-9 rounded-full overflow-hidden bg-stone-200 shrink-0"
+                    :aria-label="$t('postDetail.viewProfile')"
                   >
                     <img
-                        :src="comment.author.profile_image_url || fallbackAvatar"
-                        :alt="$t('postDetail.commentAvatar', { name: getCommentAuthorName(comment) })"
-                        class="w-full h-full object-cover"
+                      :src="comment.author.profile_image_url || fallbackAvatar"
+                      :alt="$t('postDetail.commentAvatar', { name: getCommentAuthorName(comment) })"
+                      class="w-full h-full object-cover rounded-full"
                     />
                   </router-link>
 
                   <div
-                      v-else
-                      class="w-9 h-9 rounded-full overflow-hidden bg-stone-200 shrink-0"
+                    v-else
+                    class="w-9 h-9 rounded-full overflow-hidden bg-stone-200 shrink-0"
                   >
                     <img
-                        :src="fallbackAvatar"
-                        :alt="$t('postDetail.userAvatar')"
-                        class="w-full h-full object-cover"
+                      :src="fallbackAvatar"
+                      :alt="$t('postDetail.userAvatar')"
+                      class="w-full h-full object-cover rounded-full"
                     />
                   </div>
 
                   <div class="flex-1 min-w-0">
-                    <div class="flex flex-wrap items-baseline gap-2">
+                    <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                       <span class="font-manrope font-bold text-sm text-stone-900">
                         {{ getCommentAuthorName(comment) }}
+                      </span>
+
+                      <span class="font-manrope text-[11px] font-bold text-primary">
+                        {{ getCommentAuthorUsername(comment) }}
                       </span>
 
                       <span class="text-[10px] text-stone-400 font-manrope">
@@ -277,20 +293,20 @@
 
                 <div class="relative">
                   <input
-                      id="new-comment"
-                      name="comment"
-                      v-model.trim="newComment"
-                      class="w-full bg-white border border-stone-200 rounded-full focus:border-primary focus:ring-0 pl-5 pr-24 py-4 font-manrope text-sm transition-colors placeholder:text-stone-400 placeholder:italic"
-                      :placeholder="$t('postDetail.commentPlaceholder')"
-                      type="text"
-                      maxlength="1000"
-                      required
+                    id="new-comment"
+                    name="comment"
+                    v-model.trim="newComment"
+                    class="w-full bg-white border border-stone-200 rounded-full focus:border-primary focus:ring-0 pl-5 pr-24 py-4 font-manrope text-sm transition-colors placeholder:text-stone-400 placeholder:italic"
+                    :placeholder="$t('postDetail.commentPlaceholder')"
+                    type="text"
+                    maxlength="1000"
+                    required
                   />
 
                   <button
-                      type="submit"
-                      class="absolute right-5 top-1/2 -translate-y-1/2 text-primary font-manrope text-[10px] uppercase font-bold tracking-widest disabled:opacity-40"
-                      :disabled="sendingComment || !newComment.trim()"
+                    type="submit"
+                    class="absolute right-5 top-1/2 -translate-y-1/2 rounded-full text-primary font-manrope text-[10px] uppercase font-bold tracking-widest disabled:opacity-40"
+                    :disabled="sendingComment || !newComment.trim()"
                   >
                     {{ sendingComment ? $t('common.sending') : $t('common.publish') }}
                   </button>
@@ -298,24 +314,24 @@
               </form>
 
               <p
-                  v-if="commentError"
-                  class="text-red-700 bg-red-50 border border-red-200 px-4 py-3 text-sm"
-                  role="alert"
+                v-if="commentError"
+                class="rounded-xl text-red-700 bg-red-50 border border-red-200 px-4 py-3 text-sm"
+                role="alert"
               >
                 {{ commentError }}
               </p>
             </section>
-          </div>
 
-          <!-- Acción inferior -->
-          <div class="p-7 lg:p-8 bg-[#FAF9F6]/90 backdrop-blur-md border-t border-stone-200">
-            <router-link
+            <!-- Acción inferior: forma parte del scroll del panel derecho -->
+            <div class="pt-10 mt-10 border-t border-stone-200">
+              <router-link
                 v-if="post.author?.id"
                 :to="`/profiles/${post.author.id}`"
-                class="block w-full text-center bg-gradient-to-r from-primary to-primary-container text-white py-4 px-8 font-manrope text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-opacity active:scale-[0.98]"
-            >
-              {{ $t('postDetail.viewArtistPortfolio') }}
-            </router-link>
+                class="block w-full text-center rounded-full bg-gradient-to-r from-primary to-primary-container text-white py-4 px-8 font-manrope text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-opacity active:scale-[0.98]"
+              >
+                {{ $t('postDetail.viewArtistPortfolio') }}
+              </router-link>
+            </div>
           </div>
         </aside>
       </div>
@@ -331,7 +347,6 @@ import {
   likePost,
   unlikePost,
 } from '@/services/postService'
-import { logoutUser } from '@/services/authService'
 
 export default {
   name: 'PostDetailPage',
@@ -356,11 +371,11 @@ export default {
 
   computed: {
     authorName() {
-      return (
-          this.post?.author?.artistic_name ||
-          this.post?.author?.name ||
-          this.$t('common.artist')
-      )
+      return this.post?.author?.artistic_name || this.$t('common.artist')
+    },
+
+    authorUsername() {
+      return this.formatUsername(this.post?.author?.username)
     },
   },
 
@@ -410,6 +425,7 @@ export default {
       }
 
       this.updatingLike = true
+      this.commentError = ''
 
       try {
         if (this.likedByMe) {
@@ -454,11 +470,19 @@ export default {
     },
 
     getCommentAuthorName(comment) {
-      return (
-          comment.author?.artistic_name ||
-          comment.author?.name ||
-          this.$t('common.artist')
-      )
+      return comment.author?.artistic_name || this.$t('common.artist')
+    },
+
+    getCommentAuthorUsername(comment) {
+      return this.formatUsername(comment.author?.username)
+    },
+
+    formatUsername(username) {
+      if (!username) {
+        return '@amw'
+      }
+
+      return `@${String(username).replace(/^@/, '')}`
     },
 
     formatDate(date) {
@@ -504,28 +528,79 @@ export default {
 
       return locales[this.$i18n.locale] || 'es-ES'
     },
-
-    async handleLogout() {
-      try {
-        await logoutUser()
-      } catch (error) {
-        localStorage.removeItem('amw_token')
-        localStorage.removeItem('amw_user')
-      }
-
-      this.$router.push('/login')
-    },
   },
 }
 </script>
 
 <style scoped>
-.font-notoSerif {
-  font-family: 'Noto Serif', serif;
+.post-detail-page,
+.font-notoSerif,
+.font-manrope {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "SF Pro Display", "Roboto", "Helvetica Neue", Arial, sans-serif;
 }
 
-.font-manrope {
-  font-family: 'Manrope', sans-serif;
+.post-detail-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.post-media-panel {
+  position: relative;
+  min-height: min(62vh, 620px);
+  padding: 4.5rem 1rem 1.5rem;
+  background-color: #f4f3f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.post-back-button {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  z-index: 10;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.92);
+  color: #1a1c1a;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.post-back-button:hover {
+  color: #a900a9;
+  background-color: #ffffff;
+}
+
+.post-media-frame {
+  width: min(calc(100% - 1rem), 520px);
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.1);
+}
+
+.post-media-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background-color: #000000;
+}
+
+.post-info-panel {
+  background-color: #faf9f6;
+  border-top: 1px solid #e7e5e4;
 }
 
 .material-symbols-outlined {
@@ -546,6 +621,7 @@ export default {
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #e3e2e0;
+  border-radius: 9999px;
 }
 
 .sr-only {
@@ -553,9 +629,76 @@ export default {
   width: 1px;
   height: 1px;
   padding: 0;
+  margin: -1px;
   overflow: hidden;
   white-space: nowrap;
   border: 0;
   clip: rect(0, 0, 0, 0);
+}
+
+/*
+  Vista de escritorio:
+  - La página queda anclada al viewport.
+  - El panel izquierdo nunca forma parte del desplazamiento.
+  - El único contenedor desplazable es el panel derecho.
+*/
+@media (min-width: 900px) {
+  .post-detail-page {
+    position: fixed;
+    inset: 0;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .post-detail-main {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .post-detail-layout {
+    height: 100%;
+    min-height: 0;
+    flex-direction: row;
+    overflow: hidden;
+  }
+
+  .post-media-panel {
+    width: 58%;
+    height: 100%;
+    min-height: 0;
+    flex-shrink: 0;
+    padding: 2rem;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .post-media-frame {
+    width: min(calc(100% - 2rem), 72vh, 700px);
+  }
+
+  .post-info-panel {
+    width: 42%;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    border-top: none;
+    border-left: 1px solid #e7e5e4;
+  }
+}
+
+@media (max-width: 640px) {
+  .post-media-panel {
+    min-height: 420px;
+    padding-top: 4.25rem;
+  }
+
+  .post-media-frame {
+    width: min(calc(100% - 0.5rem), 360px);
+  }
 }
 </style>

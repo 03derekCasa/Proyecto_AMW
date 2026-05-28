@@ -1,37 +1,38 @@
 <template>
   <aside
-      class="fixed left-0 top-0 h-full bg-[#FAF9F6] dark:bg-stone-950 z-50 border-r border-stone-200/40 transition-all duration-300 ease-in-out overflow-hidden"
-      :class="isExpanded ? 'w-72 px-6' : 'w-20 px-3'"
-      :aria-label="$t('accessibility.sideNavigation')"
-      @mouseenter="isExpanded = true"
-      @mouseleave="isExpanded = false"
-      @focusin="isExpanded = true"
-      @focusout="handleFocusOut"
+    class="fixed left-0 top-0 h-full px-3 bg-[#FAF9F6] dark:bg-stone-950 z-50 border-r border-stone-200/40 transition-[width] duration-300 ease-in-out overflow-hidden"
+    :class="isExpanded ? 'w-56' : 'w-20'"
+    :aria-label="$t('accessibility.sideNavigation')"
+    @mouseenter="isExpanded = true"
+    @mouseleave="isExpanded = false"
+    @focusin="isExpanded = true"
+    @focusout="handleFocusOut"
   >
     <div class="h-full flex flex-col py-7">
-      <!-- Usuario -->
+      <!-- Usuario: el avatar no se desplaza al expandir -->
       <div class="mb-12">
         <router-link
-            to="/profile"
-            class="flex items-center mb-2"
-            :class="isExpanded ? 'gap-3 px-1' : 'justify-center'"
-            :aria-label="$t('accessibility.goTo', { page: $t('nav.profile') })"
+          to="/profile"
+          class="sidebar-profile-row"
+          :aria-label="$t('accessibility.goTo', { page: $t('nav.profile') })"
         >
-          <img
+          <span class="sidebar-icon-slot">
+            <img
               :alt="$t('accessibility.profilePhoto', { name: userName })"
               class="w-10 h-10 rounded-full object-cover shrink-0"
               :src="userProfileImage"
-          />
+            />
+          </span>
 
           <div
-              v-if="isExpanded"
-              class="overflow-hidden transition-opacity duration-300"
+            class="sidebar-label sidebar-profile-label"
+            :class="{ 'sidebar-label-visible': isExpanded }"
           >
-            <h2 class="font-notoSerif text-lg leading-none text-stone-900 dark:text-stone-50 truncate">
+            <h2 class="font-manrope text-base font-extrabold leading-none text-stone-900 dark:text-stone-50 truncate">
               {{ userName }}
             </h2>
 
-            <p class="font-manrope text-[10px] tracking-widest text-primary mt-1 truncate">
+            <p class="font-manrope text-[11px] font-bold tracking-[0.08em] text-primary mt-1 truncate">
               {{ formattedUsername }}
             </p>
           </div>
@@ -41,100 +42,162 @@
       <!-- Navegación principal -->
       <nav class="flex-1 flex flex-col gap-2" :aria-label="$t('accessibility.sideNavigation')">
         <router-link
-            :class="sideLinkClass('/feed')"
-            to="/feed"
-            :aria-label="$t('accessibility.goTo', { page: $t('nav.feed') })"
-            :title="!isExpanded ? $t('nav.feed') : null"
+          :class="sideLinkClass('/feed')"
+          to="/feed"
+          :aria-label="$t('accessibility.goTo', { page: $t('nav.feed') })"
+          :title="!isExpanded ? $t('nav.feed') : null"
         >
-          <span class="material-symbols-outlined shrink-0" aria-hidden="true">
-            palette
+          <span v-if="isActive('/feed')" class="sidebar-active-line" aria-hidden="true"></span>
+
+          <span class="sidebar-icon-slot">
+            <span class="material-symbols-outlined" aria-hidden="true">
+              palette
+            </span>
           </span>
-          <span v-if="isExpanded">{{ $t('nav.feed') }}</span>
+
+          <span
+            class="sidebar-label"
+            :class="{ 'sidebar-label-visible': isExpanded }"
+          >
+            {{ $t('nav.feed') }}
+          </span>
         </router-link>
 
         <router-link
-            :class="sideLinkClass('/profile')"
-            to="/profile"
-            :aria-label="$t('accessibility.goTo', { page: $t('nav.profile') })"
-            :title="!isExpanded ? $t('nav.profile') : null"
+          :class="sideLinkClass('/profile')"
+          to="/profile"
+          :aria-label="$t('accessibility.goTo', { page: $t('nav.profile') })"
+          :title="!isExpanded ? $t('nav.profile') : null"
         >
-          <span class="material-symbols-outlined shrink-0" aria-hidden="true">
-            brush
+          <span v-if="isActive('/profile')" class="sidebar-active-line" aria-hidden="true"></span>
+
+          <span class="sidebar-icon-slot">
+            <span class="material-symbols-outlined" aria-hidden="true">
+              brush
+            </span>
           </span>
-          <span v-if="isExpanded">{{ $t('nav.profile') }}</span>
+
+          <span
+            class="sidebar-label"
+            :class="{ 'sidebar-label-visible': isExpanded }"
+          >
+            {{ $t('nav.profile') }}
+          </span>
         </router-link>
 
         <router-link
-            :class="sideLinkClass('/collections')"
-            to="/collections"
-            :aria-label="$t('accessibility.goTo', { page: $t('nav.collections') })"
-            :title="!isExpanded ? $t('nav.collections') : null"
+          :class="sideLinkClass('/collections')"
+          to="/collections"
+          :aria-label="$t('accessibility.goTo', { page: $t('nav.collections') })"
+          :title="!isExpanded ? $t('nav.collections') : null"
         >
-          <span class="material-symbols-outlined shrink-0" aria-hidden="true">
-            gallery_thumbnail
+          <span v-if="isActive('/collections')" class="sidebar-active-line" aria-hidden="true"></span>
+
+          <span class="sidebar-icon-slot">
+            <span class="material-symbols-outlined" aria-hidden="true">
+              gallery_thumbnail
+            </span>
           </span>
-          <span v-if="isExpanded">{{ $t('nav.collections') }}</span>
+
+          <span
+            class="sidebar-label"
+            :class="{ 'sidebar-label-visible': isExpanded }"
+          >
+            {{ $t('nav.collections') }}
+          </span>
         </router-link>
 
         <router-link
-            :class="sideLinkClass('/messages')"
-            to="/messages"
-            :aria-label="$t('accessibility.goTo', { page: $t('nav.messages') })"
-            :title="!isExpanded ? $t('nav.messages') : null"
+          :class="sideLinkClass('/messages')"
+          to="/messages"
+          :aria-label="$t('accessibility.goTo', { page: $t('nav.messages') })"
+          :title="!isExpanded ? $t('nav.messages') : null"
         >
-          <span class="material-symbols-outlined shrink-0" aria-hidden="true">
-            forum
+          <span v-if="isActive('/messages')" class="sidebar-active-line" aria-hidden="true"></span>
+
+          <span class="sidebar-icon-slot">
+            <span class="material-symbols-outlined" aria-hidden="true">
+              forum
+            </span>
           </span>
-          <span v-if="isExpanded">{{ $t('nav.messages') }}</span>
+
+          <span
+            class="sidebar-label"
+            :class="{ 'sidebar-label-visible': isExpanded }"
+          >
+            {{ $t('nav.messages') }}
+          </span>
         </router-link>
       </nav>
 
       <!-- Parte inferior -->
       <div class="mt-auto space-y-6">
+        <!-- El icono + permanece fijo; solo se despliega el fondo y el texto -->
         <button
-            class="sidebar-upload-button"
-            :class="isExpanded ? 'sidebar-upload-expanded' : 'sidebar-upload-collapsed'"
-            type="button"
-            :aria-label="$t('nav.uploadArtwork')"
-            @click="showCreatePostModal = true"
-            :title="!isExpanded ? $t('nav.uploadArtwork') : null"
+          class="sidebar-upload-button"
+          :class="{ 'sidebar-upload-expanded': isExpanded }"
+          type="button"
+          :aria-label="$t('nav.uploadArtwork')"
+          :title="!isExpanded ? $t('nav.uploadArtwork') : null"
+          @click="showCreatePostModal = true"
         >
-          <span
-              v-if="!isExpanded"
-              class="material-symbols-outlined text-xl"
-              aria-hidden="true"
-          >
-            add
+          <span class="sidebar-icon-slot sidebar-upload-icon">
+            <span class="material-symbols-outlined text-xl" aria-hidden="true">
+              add
+            </span>
           </span>
 
-          <span v-else class="whitespace-nowrap">
+          <span
+            class="sidebar-label"
+            :class="{ 'sidebar-label-visible': isExpanded }"
+          >
             {{ $t('nav.uploadArtwork') }}
           </span>
         </button>
 
         <div class="flex flex-col gap-2 pt-6 border-t border-stone-200 dark:border-stone-800">
           <router-link
-              :class="bottomLinkClass('/help')"
-              to="/help"
-              :aria-label="$t('accessibility.goTo', { page: $t('nav.support') })"
-              :title="!isExpanded ? $t('nav.support') : null"
+            :class="bottomLinkClass('/help')"
+            to="/help"
+            :aria-label="$t('accessibility.goTo', { page: $t('nav.support') })"
+            :title="!isExpanded ? $t('nav.support') : null"
           >
-            <span class="material-symbols-outlined text-sm shrink-0" aria-hidden="true">
-              support_agent
+            <span v-if="isActive('/help')" class="sidebar-active-line" aria-hidden="true"></span>
+
+            <span class="sidebar-icon-slot">
+              <span class="material-symbols-outlined text-sm" aria-hidden="true">
+                support_agent
+              </span>
             </span>
-            <span v-if="isExpanded">{{ $t('nav.support') }}</span>
+
+            <span
+              class="sidebar-label"
+              :class="{ 'sidebar-label-visible': isExpanded }"
+            >
+              {{ $t('nav.support') }}
+            </span>
           </router-link>
 
           <router-link
-              :class="bottomLinkClass('/terms')"
-              to="/terms"
-              :aria-label="$t('accessibility.goTo', { page: $t('nav.terms') })"
-              :title="!isExpanded ? $t('nav.terms') : null"
+            :class="bottomLinkClass('/terms')"
+            to="/terms"
+            :aria-label="$t('accessibility.goTo', { page: $t('nav.terms') })"
+            :title="!isExpanded ? $t('nav.terms') : null"
           >
-            <span class="material-symbols-outlined text-sm shrink-0" aria-hidden="true">
-              info
+            <span v-if="isActive('/terms')" class="sidebar-active-line" aria-hidden="true"></span>
+
+            <span class="sidebar-icon-slot">
+              <span class="material-symbols-outlined text-sm" aria-hidden="true">
+                info
+              </span>
             </span>
-            <span v-if="isExpanded">{{ $t('nav.terms') }}</span>
+
+            <span
+              class="sidebar-label"
+              :class="{ 'sidebar-label-visible': isExpanded }"
+            >
+              {{ $t('nav.terms') }}
+            </span>
           </router-link>
         </div>
       </div>
@@ -142,8 +205,8 @@
   </aside>
 
   <CreatePostModal
-      v-model="showCreatePostModal"
-      @created="handlePostCreated"
+    v-model="showCreatePostModal"
+    @created="handlePostCreated"
   />
 </template>
 
@@ -208,16 +271,16 @@ export default {
         const profileData = payload.data || payload.profile || payload
 
         this.userName =
-            profileData?.artistic_name ||
-            this.userName
+          profileData?.artistic_name ||
+          this.userName
 
         this.userUsername =
-            profileData?.username ||
-            this.userUsername
+          profileData?.username ||
+          this.userUsername
 
         this.userProfileImage =
-            profileData?.profile_image_url ||
-            this.userProfileImage
+          profileData?.profile_image_url ||
+          this.userProfileImage
       } catch (error) {
         if (error.response?.status === 401) {
           localStorage.removeItem('amw_token')
@@ -238,16 +301,16 @@ export default {
         const user = JSON.parse(storedUser)
 
         this.userName =
-            user?.profile?.artistic_name ||
-            this.userName
+          user?.profile?.artistic_name ||
+          this.userName
 
         this.userUsername =
-            user?.username ||
-            this.userUsername
+          user?.username ||
+          this.userUsername
 
         this.userProfileImage =
-            user?.profile?.profile_image_url ||
-            this.userProfileImage
+          user?.profile?.profile_image_url ||
+          this.userProfileImage
       } catch (error) {
         localStorage.removeItem('amw_user')
       }
@@ -263,24 +326,24 @@ export default {
 
     sideLinkClass(path) {
       const base =
-          'flex items-center gap-4 py-3 font-manrope uppercase tracking-widest text-[10px] transition-colors duration-300 whitespace-nowrap'
+          'sidebar-row font-manrope font-semibold uppercase tracking-[0.16em] text-[11px]'
 
       if (this.isActive(path)) {
-        return `${base} text-[#A900A9] dark:text-[#FF00FF] font-bold border-l-4 border-[#A900A9] ${this.isExpanded ? 'pl-4 translate-x-1' : 'pl-0 justify-center'}`
+        return `${base} text-[#A900A9] dark:text-[#FF00FF] font-extrabold`
       }
 
-      return `${base} text-stone-500 dark:text-stone-400 hover:text-[#FF00FF] ${this.isExpanded ? 'pl-5' : 'justify-center'}`
+      return `${base} text-stone-600 dark:text-stone-300 hover:text-[#FF00FF]`
     },
 
     bottomLinkClass(path) {
       const base =
-          'flex items-center gap-4 font-manrope uppercase tracking-widest text-[10px] transition-colors duration-300 whitespace-nowrap py-2'
+          'sidebar-bottom-row font-manrope font-semibold uppercase tracking-[0.16em] text-[11px]'
 
       if (this.isActive(path)) {
-        return `${base} text-[#A900A9] dark:text-[#FF00FF] font-bold border-l-4 border-[#A900A9] ${this.isExpanded ? 'pl-4 translate-x-1' : 'pl-0 justify-center'}`
+        return `${base} text-[#A900A9] dark:text-[#FF00FF] font-extrabold`
       }
 
-      return `${base} text-stone-500 dark:text-stone-400 hover:text-[#FF00FF] ${this.isExpanded ? 'pl-5' : 'justify-center'}`
+      return `${base} text-stone-600 dark:text-stone-300 hover:text-[#FF00FF]`
     },
   },
 }
@@ -295,46 +358,158 @@ export default {
   font-family: 'Manrope', sans-serif;
 }
 
-.sidebar-upload-button {
-  height: 44px;
-  min-height: 44px;
-  border-radius: 14px;
-  border: none;
-  background-color: #a900a9;
-  color: #ffffff;
-  font-family: Manrope, sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
+/*
+ * El sidebar siempre conserva el mismo padding izquierdo.
+ * Solo aumenta su anchura, por eso los iconos no saltan.
+ */
+.sidebar-profile-row,
+.sidebar-row,
+.sidebar-bottom-row {
+  position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  white-space: nowrap;
   overflow: hidden;
-  cursor: pointer;
-  transition:
-      width 0.3s ease,
-      opacity 0.2s ease,
-      transform 0.2s ease,
-      background-color 0.2s ease;
 }
 
-.sidebar-upload-button:hover {
+.sidebar-profile-row {
+  height: 52px;
+}
+
+.sidebar-row {
+  height: 48px;
+  transition: color 0.2s ease;
+}
+
+.sidebar-bottom-row {
+  height: 42px;
+  transition: color 0.2s ease;
+}
+
+/*
+ * Cada icono ocupa siempre exactamente el mismo carril.
+ * Su centro permanece en la misma posición con el sidebar cerrado o abierto.
+ */
+.sidebar-icon-slot {
+  width: 56px;
+  min-width: 56px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/*
+ * El texto no se crea y destruye con v-if.
+ * Permanece en el DOM y solo se desliza/aparece.
+ */
+.sidebar-label {
+  display: block;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateX(-10px);
+  pointer-events: none;
+  transition:
+    max-width 0.3s ease,
+    opacity 0.18s ease,
+    transform 0.3s ease;
+}
+
+.sidebar-label-visible {
+  max-width: 135px;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.sidebar-profile-label {
+  min-width: 0;
+}
+
+/*
+ * Indicador activo posicionado de forma absoluta.
+ * No añade border ni padding al link, de modo que tampoco empuja el icono.
+ */
+.sidebar-active-line {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 30px;
+  border-radius: 0 9999px 9999px 0;
+  background-color: #a900a9;
+  transform: translateY(-50%);
+}
+
+/*
+ * Botón de subir obra:
+ * cerrado: solo se ve una pastilla de 44px centrada en el carril del icono.
+ * abierto: se extiende el fondo, pero el + mantiene su posición.
+ */
+.sidebar-upload-button {
+  position: relative;
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-family: Manrope, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.sidebar-upload-button::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background-color: #a900a9;
+  transition:
+    left 0.3s ease,
+    width 0.3s ease,
+    opacity 0.2s ease;
+}
+
+.sidebar-upload-expanded::before {
+  left: 0;
+  width: 100%;
+}
+
+.sidebar-upload-button:hover::before {
   opacity: 0.9;
 }
 
-.sidebar-upload-button:active {
-  transform: scale(0.96);
+.sidebar-upload-button:active::before {
+  transform: scale(0.98);
 }
 
-.sidebar-upload-collapsed {
-  width: 44px;
-  margin-left: auto;
-  margin-right: auto;
+.sidebar-upload-icon,
+.sidebar-upload-button .sidebar-label {
+  position: relative;
+  z-index: 1;
 }
 
-.sidebar-upload-expanded {
-  width: 100%;
+.sidebar-upload-button:focus-visible,
+.sidebar-row:focus-visible,
+.sidebar-bottom-row:focus-visible,
+.sidebar-profile-row:focus-visible {
+  outline: 2px solid #a900a9;
+  outline-offset: 2px;
+  border-radius: 12px;
 }
 
 .material-symbols-outlined {

@@ -26,7 +26,7 @@
           <!-- Nuevo mensaje -->
           <div
               v-if="showNewMessagePanel"
-              class="mb-6 bg-white border border-outline-variant/30 p-4 shadow-sm"
+              class="p-4 bg-white border border-outline-variant/20 rounded-2xl shadow-sm"
           >
             <div class="flex items-center justify-between mb-4">
               <h2 class="font-manrope text-xs uppercase tracking-widest font-bold text-stone-600">
@@ -78,16 +78,21 @@
                   class="w-full flex items-center gap-3 text-left p-3 hover:bg-surface-container-low transition-colors"
                   @click="startConversation(user)"
               >
-                <div class="w-9 h-9 bg-stone-200 overflow-hidden shrink-0">
+                <div class="w-9 h-9 rounded-full bg-stone-200 overflow-hidden shrink-0">
                   <img
                       v-if="getUserAvatar(user)"
                       :src="getUserAvatar(user)"
                       :alt="ui.avatarOf(getUserName(user))"
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-cover rounded-full"
                   />
 
-                  <div v-else class="w-full h-full flex items-center justify-center text-stone-400">
-                    <span class="material-symbols-outlined text-sm" aria-hidden="true">person</span>
+                  <div
+                      v-else
+                      class="w-full h-full rounded-full flex items-center justify-center text-stone-400"
+                  >
+                    <span class="material-symbols-outlined text-sm" aria-hidden="true">
+                      person
+                    </span>
                   </div>
                 </div>
 
@@ -123,46 +128,55 @@
                   v-for="conversation in filteredConversations"
                   :key="conversation.id"
                   type="button"
-                  class="w-full text-left p-4 transition-all cursor-pointer group flex gap-3 rounded-2xl border-l-4"
+                  class="w-full text-left px-3 py-2.5 transition-all cursor-pointer group flex items-center gap-3 rounded-2xl border-l-4"
                   :class="activeConversation && activeConversation.id === conversation.id
                   ? 'bg-white border-primary'
                   : 'hover:bg-white border-transparent'"
                   @click="selectConversation(conversation)"
               >
-                <div class="w-10 h-10 bg-stone-200 shrink-0 overflow-hidden">
+                <div class="w-9 h-9 rounded-full bg-stone-200 shrink-0 overflow-hidden">
                   <img
                       v-if="getParticipantAvatar(conversation)"
                       :src="getParticipantAvatar(conversation)"
                       :alt="ui.avatarOf(getParticipantName(conversation))"
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-cover rounded-full"
                   />
 
-                  <div v-else class="w-full h-full flex items-center justify-center text-stone-400">
-                    <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                  <div
+                      v-else
+                      class="w-full h-full rounded-full flex items-center justify-center text-stone-400"
+                  >
+                    <span class="material-symbols-outlined text-lg" aria-hidden="true">
+                      person
+                    </span>
                   </div>
                 </div>
 
-                <div class="flex-1 overflow-hidden">
-                  <div class="flex justify-between items-start mb-1">
-                    <span class="font-manrope font-bold text-xs uppercase tracking-wider truncate">
+                <div class="flex-1 min-w-0 overflow-hidden">
+                  <div class="flex justify-between items-center gap-2">
+                    <span class="font-manrope font-bold text-xs tracking-wide truncate">
                       {{ getParticipantName(conversation) }}
                     </span>
 
-                    <span class="text-[10px] text-stone-400 shrink-0 ml-2">
+                    <span class="text-[10px] text-stone-400 shrink-0">
                       {{ formatConversationTime(conversation.last_message?.created_at || conversation.updated_at) }}
                     </span>
                   </div>
 
-                  <p class="font-manrope text-[10px] text-primary truncate mb-1">
+                  <p class="font-manrope text-[10px] font-semibold text-primary truncate leading-4">
                     {{ getParticipantUsername(conversation) }}
                   </p>
 
-                  <p class="text-sm text-stone-600 truncate font-manrope">
-                    {{ conversation.last_message?.body || ui.noMessagesYet }}
-                  </p>
+                  <div class="flex items-center gap-2">
+                    <p class="text-xs text-stone-500 truncate font-manrope leading-4 flex-1">
+                      {{ conversation.last_message?.body || ui.noMessagesYet }}
+                    </p>
 
-                  <div v-if="conversation.unread_count > 0" class="mt-2 flex gap-1">
-                    <span class="w-2 h-2 bg-primary"></span>
+                    <span
+                        v-if="conversation.unread_count > 0"
+                        class="w-2 h-2 rounded-full bg-primary shrink-0"
+                        aria-hidden="true"
+                    ></span>
                   </div>
                 </div>
               </button>
@@ -199,7 +213,7 @@
                       v-if="getParticipantAvatar(activeConversation)"
                       :src="getParticipantAvatar(activeConversation)"
                       :alt="ui.avatarOf(getParticipantName(activeConversation))"
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-cover rounded-full"
                   />
 
                   <div v-else class="w-full h-full flex items-center justify-center text-stone-400">
@@ -275,7 +289,7 @@
                         v-if="getMessageSenderAvatar(message)"
                         :src="getMessageSenderAvatar(message)"
                         :alt="ui.profilePhotoOf(getMessageSenderName(message))"
-                        class="w-full h-full object-cover"
+                        class="w-full h-full object-cover rounded-full"
                     />
 
                     <div

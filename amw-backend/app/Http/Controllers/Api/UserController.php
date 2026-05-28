@@ -3,13 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Listar o buscar usuarios para iniciar conversaciones.
+     *
+     * Solo devuelve datos públicos:
+     * - nombre artístico
+     * - @username
+     * - especialidad
+     * - foto de perfil
+     */
+    public function index(Request $request): JsonResponse
     {
         $search = trim((string) $request->query('search', ''));
         $cleanSearch = ltrim(strtolower($search), '@');
@@ -31,7 +42,7 @@ class UserController extends Controller
             ->orderBy('username')
             ->limit(20)
             ->get()
-            ->map(function ($user) {
+            ->map(function (User $user) {
                 return [
                     'id' => $user->id,
                     'username' => $user->username,
@@ -53,15 +64,32 @@ class UserController extends Controller
         ]);
     }
 
-    public function publicProfile(Request $request, $id)
+    /**
+     * Perfil público de otro artista.
+     */
+    public function publicProfile(Request $request, int $id): JsonResponse
     {
-        $user = User::with('profile')->findOrFail($id);
+        $user = User::query()
+            ->with('profile')
+            ->withCount(['followers', 'following'])
+            ->findOrFail($id);
 
-        $posts = Post::with(['category', 'user.profile'])
+        $posts = Post::query()
+            ->with(['category', 'user.profile'])
+            ->withCount(['likes', 'comments'])
             ->where('user_id', $user->id)
             ->where('is_published', true)
             ->latest()
             ->get();
+
+        $isFollowing = false;
+
+        if ($request->user()->id !== $user->id) {
+            $isFollowing = $request->user()
+                ->following()
+                ->where('users.id', $user->id)
+                ->exists();
+        }
 
         return response()->json([
             'message' => 'Perfil público obtenido correctamente',
@@ -69,8 +97,8 @@ class UserController extends Controller
                 'user' => [
                     'id' => $user->id,
                     'username' => $user->username,
-                    'avatar' => $user->avatar ?? null,
                 ],
+
                 'profile' => [
                     'id' => $user->profile?->id,
                     'user_id' => $user->id,
@@ -81,12 +109,26 @@ class UserController extends Controller
                     'cover_image_url' => $user->profile?->cover_image_url,
                     'social_links' => $user->profile?->social_links,
                 ],
-                'posts' => $posts,
+
+                'posts' => PostResource::collection($posts),
+
                 'stats' => [
                     'works_count' => $posts->count(),
-                    'followers' => 0,
-                    'following' => 0,
+                    'followers' => $user->followers_count,
+                    'following' => $user->following_count,
                 ],
+
+                /*
+                 * Este valor permitirá que Vue muestre:
+                 * Seguir / Siguiendo.
+                 */
+                'is_following' => $isFollowing,
+
+                /*
+                 * Nos permite ocultar el botón si accidentalmente
+                 * se abre el perfil público propio.
+                 */
+                'is_own_profile' => $request->user()->id === $user->id,
             ],
         ]);
     }

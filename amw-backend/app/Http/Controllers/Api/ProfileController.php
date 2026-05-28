@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Profile;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    public function show(Request $request)
+    public function show(Request $request): JsonResponse
     {
-        $profile = $this->getOrCreateProfile($request);
+        $profile = $this->getOrCreateProfile($request)->load('user');
 
         return response()->json([
             'message' => 'Perfil obtenido correctamente',
@@ -19,12 +20,13 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    public function update(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'artistic_name' => ['required', 'string', 'max:255'],
             'specialty' => ['nullable', 'string', 'max:255'],
             'biography' => ['nullable', 'string', 'max:5000'],
+
             'social_links' => ['nullable', 'array'],
             'social_links.instagram' => ['nullable', 'string', 'max:255'],
             'social_links.behance' => ['nullable', 'string', 'max:255'],
@@ -42,13 +44,15 @@ class ProfileController extends Controller
             'social_links' => $validated['social_links'] ?? null,
         ]);
 
+        $profile->load('user');
+
         return response()->json([
             'message' => 'Perfil actualizado correctamente',
             'data' => $this->profileData($profile),
         ]);
     }
 
-    public function uploadImage(Request $request)
+    public function uploadImage(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -72,7 +76,7 @@ class ProfileController extends Controller
         ], 201);
     }
 
-    public function uploadCoverImage(Request $request)
+    public function uploadCoverImage(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
@@ -102,7 +106,7 @@ class ProfileController extends Controller
             ->profile()
             ->firstOrCreate(
                 ['user_id' => $request->user()->id],
-                ['artistic_name' => $request->user()->name]
+                ['artistic_name' => $request->user()->username ?? 'Artista AMW']
             );
     }
 
@@ -124,12 +128,19 @@ class ProfileController extends Controller
         return [
             'id' => $profile->id,
             'user_id' => $profile->user_id,
+            'username' => $profile->user?->username,
             'artistic_name' => $profile->artistic_name,
             'specialty' => $profile->specialty,
             'biography' => $profile->biography,
             'profile_image_url' => $profile->profile_image_url,
             'cover_image_url' => $profile->cover_image_url,
             'social_links' => $profile->social_links,
+
+            /*
+             * Contadores que utilizará ProfilePage.vue.
+             */
+            'followers_count' => $profile->user?->followers()->count() ?? 0,
+            'following_count' => $profile->user?->following()->count() ?? 0,
         ];
     }
 }

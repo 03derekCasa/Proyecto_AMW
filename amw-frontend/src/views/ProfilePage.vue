@@ -42,7 +42,7 @@
               {{ userName }}
             </h2>
 
-            <p class="font-manrope text-sm text-primary font-medium mb-2">
+            <p class="profile-username font-manrope text-sm text-primary mb-2">
               {{ formattedUsername }}
             </p>
 
@@ -55,7 +55,7 @@
                 <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
                   {{ ui.works }}
                 </span>
-                <span class="font-notoSerif text-2xl">
+                <span class="profile-stat-number font-notoSerif text-2xl">
                   {{ userWorksCount }}
                 </span>
               </div>
@@ -64,7 +64,7 @@
                 <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
                   {{ ui.followers }}
                 </span>
-                <span class="font-notoSerif text-2xl">
+                <span class="profile-stat-number font-notoSerif text-2xl">
                   {{ userFollowers }}
                 </span>
               </div>
@@ -73,7 +73,7 @@
                 <span class="font-manrope text-[10px] uppercase tracking-[0.2em] text-stone-400">
                   {{ ui.following }}
                 </span>
-                <span class="font-notoSerif text-2xl">
+                <span class="profile-stat-number font-notoSerif text-2xl">
                   {{ userFollowing }}
                 </span>
               </div>
@@ -695,7 +695,7 @@ export default {
       userName: 'Artista AMW',
       userUsername: '',
       userWorksCount: 0,
-      userFollowers: '0',
+      userFollowers: 0,
       userFollowing: 0,
 
       fallbackCoverImage:
@@ -812,6 +812,8 @@ export default {
         this.userName = data.artistic_name || this.ui.artist
         this.userUsername = data.username || this.userUsername
         this.userProfileImage = data.profile_image_url || this.userProfileImage
+        this.userFollowers = data.followers_count ?? 0
+        this.userFollowing = data.following_count ?? 0
       } catch (error) {
         if (error.response?.status === 401) {
           localStorage.removeItem('amw_token')
@@ -1010,7 +1012,21 @@ export default {
 
 <style scoped>
 .profile-page {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --username-font-weight: 700;
+  --stat-number-font-weight: 700;
+
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+  "Roboto", "Helvetica Neue", Arial, sans-serif;
+}
+
+.profile-username {
+  font-weight: var(--username-font-weight);
+  letter-spacing: 0.01em;
+}
+
+.profile-stat-number {
+  font-weight: var(--stat-number-font-weight);
+  line-height: 1.1;
 }
 
 .profile-page .font-notoSerif,
