@@ -8,7 +8,7 @@
 
     <!-- Contenido Principal -->
 
-    <main class="ml-20 pt-32 min-h-screen" aria-labelledby="public-profile-title">
+    <main class="ml-20 pt-20 min-h-screen" aria-labelledby="public-profile-title">
       <div v-if="loading" class="px-24 py-20 font-manrope text-sm text-stone-500">
         {{ ui.loading }}
       </div>
