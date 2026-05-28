@@ -17,7 +17,7 @@
     <main class="ml-20 pt-20 min-h-screen">
       <!-- Header -->
       <header class="relative px-12 mb-32">
-        <div class="w-full h-[512px] bg-surface-container-low relative overflow-hidden rounded-3xl">
+        <div class="w-full h-[360px] bg-surface-container-low relative overflow-hidden rounded-3xl">
           <img
               class="w-full h-full object-cover rounded-3xl grayscale opacity-70 mix-blend-multiply"
               :src="displayCoverImage"
