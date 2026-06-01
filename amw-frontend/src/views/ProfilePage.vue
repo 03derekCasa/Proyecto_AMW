@@ -428,14 +428,118 @@
                 </div>
               </button>
 
-              <div class="flex justify-between items-baseline">
-                <h3 class="font-notoSerif text-xl italic">
-                  {{ artwork.title }}
-                </h3>
+              <div class="space-y-4">
+                <div class="flex justify-between items-start gap-4">
+                  <div class="min-w-0">
+                    <h3 class="font-notoSerif text-xl italic break-words">
+                      {{ artwork.title }}
+                    </h3>
 
-                <span class="font-manrope text-[10px] text-stone-400 uppercase tracking-widest">
-                  {{ artwork.year }} • {{ artwork.medium }}
-                </span>
+                    <span class="font-manrope text-[10px] text-stone-400 uppercase tracking-widest">
+                      {{ artwork.year }} • {{ artwork.medium }}
+                    </span>
+                  </div>
+
+                  <span
+                      class="shrink-0 rounded-full px-3 py-1 font-manrope text-[10px] uppercase tracking-widest border border-outline-variant/40 text-stone-500"
+                  >
+                    {{ artwork.isPublished ? ui.published : ui.draft }}
+                  </span>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                  <button
+                      type="button"
+                      class="px-4 py-2 rounded-full border border-outline-variant text-on-surface font-manrope text-[10px] uppercase tracking-widest hover:bg-surface-container transition-colors"
+                      @click="toggleArtworkDetails(artwork.id)"
+                  >
+                    {{ expandedPostId === artwork.id ? ui.hideExtraInfo : ui.viewExtraInfo }}
+                  </button>
+
+                  <button
+                      type="button"
+                      class="px-4 py-2 rounded-full border border-red-300 text-red-600 font-manrope text-[10px] uppercase tracking-widest hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      :disabled="deletingPostId === artwork.id"
+                      @click="deleteArtwork(artwork)"
+                  >
+                    {{ deletingPostId === artwork.id ? ui.deletingArtwork : ui.deleteArtwork }}
+                  </button>
+                </div>
+
+                <div
+                    v-if="expandedPostId === artwork.id"
+                    class="rounded-2xl border border-outline-variant/30 bg-surface-container-low p-5 space-y-4"
+                >
+                  <p class="font-manrope text-sm text-stone-600 leading-relaxed">
+                    {{ artwork.description || ui.noDescription }}
+                  </p>
+
+                  <dl class="grid grid-cols-2 gap-4 font-manrope text-xs">
+                    <div>
+                      <dt class="uppercase tracking-widest text-stone-400 text-[10px]">
+                        {{ ui.category }}
+                      </dt>
+                      <dd class="mt-1 text-on-surface">
+                        {{ artwork.categoryName || ui.noCategory }}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt class="uppercase tracking-widest text-stone-400 text-[10px]">
+                        {{ ui.type }}
+                      </dt>
+                      <dd class="mt-1 text-on-surface">
+                        {{ formatPostType(artwork.type) }}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt class="uppercase tracking-widest text-stone-400 text-[10px]">
+                        {{ ui.likes }}
+                      </dt>
+                      <dd class="mt-1 text-on-surface">
+                        {{ artwork.likesCount }}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt class="uppercase tracking-widest text-stone-400 text-[10px]">
+                        {{ ui.comments }}
+                      </dt>
+                      <dd class="mt-1 text-on-surface">
+                        {{ artwork.commentsCount }}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt class="uppercase tracking-widest text-stone-400 text-[10px]">
+                        {{ ui.createdAt }}
+                      </dt>
+                      <dd class="mt-1 text-on-surface">
+                        {{ formatDate(artwork.createdAt) }}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt class="uppercase tracking-widest text-stone-400 text-[10px]">
+                        {{ ui.updatedAt }}
+                      </dt>
+                      <dd class="mt-1 text-on-surface">
+                        {{ formatDate(artwork.updatedAt) }}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <div v-if="artwork.hashtags.length" class="flex flex-wrap gap-2 pt-1">
+                    <span
+                        v-for="tag in artwork.hashtags"
+                        :key="`${artwork.id}-${tag}`"
+                        class="rounded-full bg-surface px-3 py-1 font-manrope text-[10px] uppercase tracking-widest text-primary border border-primary/10"
+                    >
+                      #{{ tag }}
+                    </span>
+                  </div>
+                </div>
               </div>
             </article>
           </div>
@@ -499,7 +603,7 @@ import {
   uploadCoverImage,
 } from '@/services/profileService'
 
-import { getMyPosts } from '@/services/postService'
+import { getMyPosts, deletePost } from '@/services/postService'
 import { logoutUser } from '@/services/authService'
 import CoverImageCropModal from '@/components/CoverImageCropModal.vue'
 
@@ -538,6 +642,27 @@ const profileTexts = {
     emptyWorksTitle: 'Todavía no tienes obras publicadas.',
     emptyWorksText: 'Cuando crees publicaciones en AMW, aparecerán aquí como parte de tu portfolio.',
     viewArtwork: 'Ver obra',
+    viewExtraInfo: 'Ver info extra',
+    hideExtraInfo: 'Ocultar info',
+    deleteArtwork: 'Eliminar',
+    deletingArtwork: 'Eliminando...',
+    confirmDeleteArtwork: '¿Seguro que quieres eliminar esta publicación? Esta acción no se puede deshacer.',
+    postDeleted: 'Publicación eliminada correctamente.',
+    postDeleteError: 'No se pudo eliminar la publicación.',
+    published: 'Publicada',
+    draft: 'Borrador',
+    noDescription: 'Esta publicación no tiene descripción.',
+    category: 'Categoría',
+    noCategory: 'Sin categoría',
+    type: 'Tipo',
+    likes: 'Likes',
+    comments: 'Comentarios',
+    createdAt: 'Creada',
+    updatedAt: 'Actualizada',
+    noDate: 'Sin fecha',
+    typeArtwork: 'Obra',
+    typeEvent: 'Evento',
+    typeProduct: 'Producto',
     viewFullPortfolio: 'Ver más publicaciones',
     artwork: 'Obra',
     footerLabel: 'Pie de página de AMW',
@@ -590,6 +715,27 @@ const profileTexts = {
     emptyWorksTitle: 'You do not have published artworks yet.',
     emptyWorksText: 'When you create publications on AMW, they will appear here as part of your portfolio.',
     viewArtwork: 'View artwork',
+    viewExtraInfo: 'View extra info',
+    hideExtraInfo: 'Hide info',
+    deleteArtwork: 'Delete',
+    deletingArtwork: 'Deleting...',
+    confirmDeleteArtwork: 'Are you sure you want to delete this publication? This action cannot be undone.',
+    postDeleted: 'Publication deleted successfully.',
+    postDeleteError: 'The publication could not be deleted.',
+    published: 'Published',
+    draft: 'Draft',
+    noDescription: 'This publication has no description.',
+    category: 'Category',
+    noCategory: 'No category',
+    type: 'Type',
+    likes: 'Likes',
+    comments: 'Comments',
+    createdAt: 'Created',
+    updatedAt: 'Updated',
+    noDate: 'No date',
+    typeArtwork: 'Artwork',
+    typeEvent: 'Event',
+    typeProduct: 'Product',
     viewFullPortfolio: 'View more publications',
     artwork: 'Artwork',
     footerLabel: 'AMW footer',
@@ -642,6 +788,27 @@ const profileTexts = {
     emptyWorksTitle: 'Vous n’avez pas encore publié d’œuvres.',
     emptyWorksText: 'Lorsque vous créerez des publications sur AMW, elles apparaîtront ici dans votre portfolio.',
     viewArtwork: 'Voir l’œuvre',
+    viewExtraInfo: 'Voir les infos',
+    hideExtraInfo: 'Masquer les infos',
+    deleteArtwork: 'Supprimer',
+    deletingArtwork: 'Suppression...',
+    confirmDeleteArtwork: 'Voulez-vous vraiment supprimer cette publication ? Cette action est irréversible.',
+    postDeleted: 'Publication supprimée correctement.',
+    postDeleteError: 'La publication n’a pas pu être supprimée.',
+    published: 'Publiée',
+    draft: 'Brouillon',
+    noDescription: 'Cette publication n’a pas de description.',
+    category: 'Catégorie',
+    noCategory: 'Sans catégorie',
+    type: 'Type',
+    likes: 'Likes',
+    comments: 'Commentaires',
+    createdAt: 'Créée',
+    updatedAt: 'Mise à jour',
+    noDate: 'Sans date',
+    typeArtwork: 'Œuvre',
+    typeEvent: 'Événement',
+    typeProduct: 'Produit',
     viewFullPortfolio: 'Voir plus de publications',
     artwork: 'Œuvre',
     footerLabel: 'Pied de page AMW',
@@ -710,6 +877,8 @@ export default {
       profileSnapshot: null,
 
       artworks: [],
+      expandedPostId: null,
+      deletingPostId: null,
     }
   },
 
@@ -754,6 +923,78 @@ export default {
 
     goToPost(postId) {
       this.$router.push(`/posts/${postId}`)
+    },
+
+    toggleArtworkDetails(postId) {
+      this.expandedPostId = this.expandedPostId === postId ? null : postId
+    },
+
+    formatPostType(type) {
+      const types = {
+        obra: this.ui.typeArtwork,
+        evento: this.ui.typeEvent,
+        producto: this.ui.typeProduct,
+      }
+
+      return types[type] || type || this.ui.artwork
+    },
+
+    formatDate(date) {
+      if (!date) {
+        return this.ui.noDate
+      }
+
+      const parsedDate = new Date(date)
+
+      if (Number.isNaN(parsedDate.getTime())) {
+        return this.ui.noDate
+      }
+
+      return new Intl.DateTimeFormat(this.$i18n.locale || 'es', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }).format(parsedDate)
+    },
+
+    async deleteArtwork(artwork) {
+      if (!artwork?.id) {
+        return
+      }
+
+      const confirmed = window.confirm(this.ui.confirmDeleteArtwork)
+
+      if (!confirmed) {
+        return
+      }
+
+      this.deletingPostId = artwork.id
+      this.successMessage = ''
+      this.errorMessage = ''
+
+      try {
+        await deletePost(artwork.id)
+
+        this.artworks = this.artworks.filter((item) => item.id !== artwork.id)
+        this.userWorksCount = this.artworks.length
+
+        if (this.expandedPostId === artwork.id) {
+          this.expandedPostId = null
+        }
+
+        this.successMessage = this.ui.postDeleted
+      } catch (error) {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('amw_token')
+          localStorage.removeItem('amw_user')
+          this.$router.push('/login')
+          return
+        }
+
+        this.errorMessage = error.response?.data?.message || this.ui.postDeleteError
+      } finally {
+        this.deletingPostId = null
+      }
     },
 
     toggleEditForm() {
@@ -836,11 +1077,20 @@ export default {
         this.artworks = posts.map((post) => ({
           id: post.id,
           image: post.image_url || 'https://placehold.co/600x800?text=AMW',
-          title: post.title,
+          title: post.title || this.ui.artwork,
+          description: post.description || '',
+          hashtags: Array.isArray(post.hashtags) ? post.hashtags : [],
           year: post.created_at
               ? new Date(post.created_at).getFullYear()
               : new Date().getFullYear(),
-          medium: post.category?.name || post.type || this.ui.artwork,
+          medium: post.category?.name || this.formatPostType(post.type),
+          categoryName: post.category?.name || '',
+          type: post.type || '',
+          isPublished: Boolean(post.is_published),
+          likesCount: post.likes_count ?? 0,
+          commentsCount: post.comments_count ?? 0,
+          createdAt: post.created_at || '',
+          updatedAt: post.updated_at || '',
         }))
 
         this.userWorksCount = this.artworks.length
