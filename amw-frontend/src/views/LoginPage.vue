@@ -118,9 +118,7 @@
                 <button
                   class="font-label text-[10px] uppercase tracking-widest text-primary font-bold hover:opacity-70 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4"
                   type="button"
-                  :aria-label="copy.recoverPassword"
                 >
-                  {{ copy.forgotPassword }}
                 </button>
               </div>
 
