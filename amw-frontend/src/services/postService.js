@@ -95,13 +95,27 @@ export async function uploadPostImage(file) {
     })
 
     const payload = response.data
-    const imageUrl = payload?.data?.image_url || payload?.data?.url || payload?.image_url || payload?.url
 
-    if (!imageUrl) {
-        throw new Error('No se recibió la URL de la imagen subida.')
+    const imageUrl =
+        payload?.data?.image_url ||
+        payload?.data?.url ||
+        payload?.image_url ||
+        payload?.url
+
+    const imagePublicId =
+        payload?.data?.public_id ||
+        payload?.data?.path ||
+        payload?.public_id ||
+        payload?.path
+
+    if (!imageUrl || !imagePublicId) {
+        throw new Error('No se recibieron correctamente los datos de la imagen subida.')
     }
 
-    return imageUrl
+    return {
+        url: imageUrl,
+        publicId: imagePublicId,
+    }
 }
 
 export async function createPost(postData) {
@@ -132,7 +146,9 @@ export async function unlikePost(postId) {
 export async function getMyLikes() {
     const response = await api.get('/my-likes')
     const payload = response.data
+
     const items = normalizePostList(payload)
+
     const posts = items
         .map((item) => item.post || item)
         .filter((post) => post && post.id)
@@ -154,4 +170,14 @@ export async function createComment(postId, content) {
 export async function deleteComment(commentId) {
     const response = await api.delete(`/comments/${commentId}`)
     return response.data
+}
+
+export async function likeComment(commentId) {
+    const response = await api.post(`/comments/${commentId}/like`)
+    return response.data?.data || response.data
+}
+
+export async function unlikeComment(commentId) {
+    const response = await api.delete(`/comments/${commentId}/like`)
+    return response.data?.data || response.data
 }

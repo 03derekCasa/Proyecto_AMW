@@ -147,10 +147,6 @@ class PostController extends Controller
     {
         $post = Post::where('user_id', $request->user()->id)->findOrFail($id);
 
-        /*
-         * Primero se elimina el recurso multimedia asociado.
-         * invalidate=true, dentro del servicio, solicita limpiar la copia CDN.
-         */
         if ($post->image_public_id) {
             $cloudinaryService->deleteImage($post->image_public_id);
         }

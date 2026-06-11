@@ -409,24 +409,44 @@
                 :key="artwork.id"
                 class="space-y-6"
             >
-              <button
-                  type="button"
-                  class="block w-full bg-surface-container aspect-[3/4] relative overflow-hidden rounded-2xl group"
-                  :aria-label="`${ui.viewArtwork}: ${artwork.title}`"
-                  @click="goToPost(artwork.id)"
-              >
-                <img
-                    class="w-full h-full object-cover rounded-2xl transition-transform duration-700 cursor-pointer group-hover:scale-105"
-                    :src="artwork.image"
-                    :alt="artwork.title"
-                />
+              <div class="artwork-card relative">
+                <button
+                    type="button"
+                    class="block w-full bg-surface-container aspect-[3/4] relative overflow-hidden rounded-2xl group"
+                    :aria-label="`${ui.viewArtwork}: ${artwork.title}`"
+                    @click="goToPost(artwork.id)"
+                >
+                  <img
+                      class="w-full h-full object-cover rounded-2xl transition-transform duration-700 cursor-pointer group-hover:scale-105"
+                      :src="artwork.image"
+                      :alt="artwork.title"
+                  />
 
-                <div class="absolute inset-0 rounded-2xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white rounded-full px-4 py-2">
-                    {{ ui.viewArtwork }}
+                  <div class="absolute inset-0 rounded-2xl bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span class="font-manrope text-white uppercase tracking-widest text-[10px] border border-white rounded-full px-4 py-2">
+                      {{ ui.viewArtwork }}
+                    </span>
+                  </div>
+                </button>
+
+                <button
+                    type="button"
+                    class="artwork-delete-button"
+                    :class="{ 'is-deleting': deletingArtworkId === artwork.id }"
+                    :disabled="deletingArtworkId === artwork.id"
+                    :aria-label="`${ui.deleteArtwork}: ${artwork.title}`"
+                    :title="ui.deleteArtwork"
+                    @click.stop="openDeleteConfirmation(artwork)"
+                >
+                  <span
+                      class="material-symbols-outlined"
+                      :class="{ 'animate-spin': deletingArtworkId === artwork.id }"
+                      aria-hidden="true"
+                  >
+                    {{ deletingArtworkId === artwork.id ? 'progress_activity' : 'delete' }}
                   </span>
-                </div>
-              </button>
+                </button>
+              </div>
 
               <div class="space-y-4">
                 <div class="flex justify-between items-start gap-4">
@@ -592,6 +612,57 @@
         :image-src="coverOriginalPreviewUrl"
         @cropped="handleCroppedCover"
     />
+
+    <transition name="delete-confirm-fade">
+      <div
+          v-if="artworkToDelete"
+          class="delete-confirm-overlay"
+          @click.self="closeDeleteConfirmation"
+      >
+        <section
+            class="delete-confirm-modal"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-artwork-title"
+            aria-describedby="delete-artwork-description"
+        >
+          <h2 id="delete-artwork-title" class="delete-confirm-modal__title">
+            {{ ui.deleteModalTitle }}
+          </h2>
+
+          <p id="delete-artwork-description" class="delete-confirm-modal__text">
+            {{ ui.deleteArtworkConfirm.replace('{title}', artworkToDelete.title) }}
+          </p>
+
+          <div class="delete-confirm-modal__actions">
+            <button
+                type="button"
+                class="delete-confirm-button delete-confirm-button--cancel"
+                :disabled="deletingArtworkId !== null"
+                @click="closeDeleteConfirmation"
+            >
+              {{ ui.cancel }}
+            </button>
+
+            <button
+                type="button"
+                class="delete-confirm-button delete-confirm-button--danger"
+                :disabled="deletingArtworkId !== null"
+                @click="confirmDeleteArtwork"
+            >
+              <span
+                  v-if="deletingArtworkId !== null"
+                  class="material-symbols-outlined animate-spin delete-confirm-button__loader"
+                  aria-hidden="true"
+              >
+                progress_activity
+              </span>
+              {{ deletingArtworkId !== null ? ui.deletingArtwork : ui.confirmDeleteArtwork }}
+            </button>
+          </div>
+        </section>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -877,6 +948,8 @@ export default {
       profileSnapshot: null,
 
       artworks: [],
+      artworkToDelete: null,
+      deletingArtworkId: null,
       expandedPostId: null,
       deletingPostId: null,
     }
@@ -1286,6 +1359,149 @@ export default {
 
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.artwork-delete-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 9999px;
+  background: rgba(28, 25, 23, 0.64);
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.artwork-delete-button:hover,
+.artwork-delete-button:focus-visible {
+  background: #dc2626;
+  outline: none;
+}
+
+.artwork-delete-button.is-deleting,
+.artwork-delete-button:disabled {
+  opacity: 1;
+  cursor: wait;
+  background: rgba(120, 113, 108, 0.8);
+}
+
+@media (hover: hover) {
+  .artwork-delete-button {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+  }
+
+  .artwork-card:hover .artwork-delete-button,
+  .artwork-delete-button:focus-visible,
+  .artwork-delete-button.is-deleting {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.delete-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(20, 18, 18, 0.28);
+  backdrop-filter: blur(2px);
+}
+
+.delete-confirm-modal {
+  width: min(420px, 100%);
+  padding: 1.75rem;
+  border: 1px solid rgba(120, 113, 108, 0.15);
+  border-radius: 1.5rem;
+  background: #faf9f6;
+  box-shadow: 0 20px 60px rgba(28, 25, 23, 0.18);
+}
+
+.delete-confirm-modal__title {
+  margin: 0 0 0.7rem;
+  color: #292524;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.delete-confirm-modal__text {
+  margin: 0;
+  color: #78716c;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.delete-confirm-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.6rem;
+}
+
+.delete-confirm-button {
+  min-height: 2.6rem;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.delete-confirm-button--cancel {
+  border-color: rgba(120, 113, 108, 0.24);
+  background: transparent;
+  color: #57534e;
+}
+
+.delete-confirm-button--cancel:hover:not(:disabled) {
+  background: #f0eeeb;
+}
+
+.delete-confirm-button--danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #a900a9;
+  color: #ffffff;
+}
+
+.delete-confirm-button--danger:hover:not(:disabled) {
+  background: #8c008c;
+}
+
+.delete-confirm-button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.delete-confirm-button__loader {
+  font-size: 1rem;
+}
+
+.delete-confirm-fade-enter-active,
+.delete-confirm-fade-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.delete-confirm-fade-enter-from,
+.delete-confirm-fade-leave-to {
+  opacity: 0;
 }
 
 .profile-footer {
